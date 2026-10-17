@@ -11,7 +11,7 @@
     "start": "next start --port 3001",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --selectProjects unit && jest --selectProjects integration --runInBand --forceExit",
     "db:generate": "node scripts/db-generate.mjs",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts"

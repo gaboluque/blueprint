@@ -62,6 +62,7 @@ db/migrations/                    drizzle-kit SQL; review generated SQL, do not 
 scripts/db-generate.mjs           requires a declarative migration name (snake_case)
 scripts/seed.ts                   idempotent fake seed
 tests/unit/**                     mirrors src/
+tests/integration/**              route integration tests (`*.integration.test.ts`)
 ```
 
 A new feature touches four folders: `frontend/gateway/<domain>.ts` (one method per endpoint), `frontend/features/<domain>/*.tsx` (UI), `app/(client)/admin/(panel)/<domain>/page.tsx` (one-line binding), and `app/(server)/api/admin/<domain>/route.ts` (thin HTTP glue calling a service in `domains/<domain>/services/`).
@@ -116,11 +117,16 @@ export const UpdateInstitution = { call };
 
 ## Testing
 
-- Arrange–Act–Assert, separated by blank lines, no section comments. Add to existing `describe` blocks.
-- Services: pass fake repo objects (`{ institutions: { findById: jest.fn() } }`); never mock the subject.
-- Mandatory coverage: policies, model rules, auth, error mapping, and every service's happy path plus denied/not-found/conflict cases.
-- Names describe the asserted behavior. No impossible states.
-- Factories: `tests/factories/models.ts`.
+Every test uses **Arrange–Act–Assert**: set up data and dependencies, invoke the subject once, assert outcomes. Separate those three blocks with a **blank line** each. Do not use `// Arrange` comments or other section labels.
+
+- **Unit** (`tests/unit/**`): mirror `src/`. Add cases to existing `describe` blocks when one exists for the subject.
+- **Services:** pass fake repo objects (`{ institutions: { findById: jest.fn() } }`); never mock the subject.
+- **Integration** (`tests/integration/**`): one `*.integration.test.ts` per API `route.ts` (e.g. `institutions/route.ts` → `tests/integration/api/admin/institutions.route.integration.test.ts`). Inside the file, one top-level `describe("METHOD /api/…/path")` per exported handler (e.g. `describe("GET /api/admin/institutions")`, then `describe("POST /api/admin/institutions")`). Each `it` is one behavior and follows AAA in the test body (fixtures and sign-in belong in **Arrange**, not split across multiple acts in one `it`).
+- **Integration setup:** `IntegrationDb.reset()` in `beforeEach` for isolation. Unauthenticated cases (401) reset only; authenticated nested `describe`s add `UserFactory.createAdmin()` plus one `IntegrationRoute.signInAsAdmin()` in `beforeEach` and reuse `cookie`. Integration env sets `BCRYPT_ROUNDS=4`; `globalSetup` skips `db:migrate` when `drizzle.__drizzle_migrations` matches the journal (override with `INTEGRATION_SKIP_MIGRATE=1`). Persist rows with `tests/integration/factories/*` (defaults from `tests/factories/models.ts`). Call the exported route handler; assert status, envelope, and DB-backed fields. Never mock `Database` or domain services. `npm test` runs integration with `--runInBand` so one shared Postgres isn't truncated concurrently.
+- **Mandatory coverage:** policies, model rules, auth, error mapping, and every service's happy path plus denied/not-found/conflict cases.
+- **Names** describe the asserted behavior. No impossible states.
+- **Factories:** in-memory `tests/factories/models.ts`; persisted integration `tests/integration/factories/*.factory.ts`.
+- **Test imports:** `@/*` → `src/`; `@tests/*` → `tests/` (Jest + `tsconfig` paths).
 
 ## Quality gates
 
