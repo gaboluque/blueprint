@@ -20,6 +20,10 @@ export class StudentsRepo extends BaseRepo<typeof students, Student> {
     return new Student(row);
   }
 
+  protected override institutionIdOf(row: Row<typeof students>): string {
+    return row.institutionId;
+  }
+
   findByEmail(email: string): Promise<Student | null> {
     return this.findBy({ email: email.toLowerCase() });
   }

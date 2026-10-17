@@ -12,9 +12,16 @@ export const runtime = "nodejs";
 const INVALID_CREDENTIALS_MESSAGE = "Correo o contraseña incorrectos.";
 
 export const POST = PublicApiHandler(
-  async ({ body, repos }) => {
+  async ({ body, repos, requestId, setAuditContext }) => {
     const session = await Auth.provider().signIn(repos.users, body);
     if (!session) throw new UnauthorizedError(INVALID_CREDENTIALS_MESSAGE);
+
+    setAuditContext({ actor: session.actor, requestId });
+    await repos.audit.record({
+      entityType: "user",
+      verb: "signed_in",
+      entityId: session.actor.id,
+    });
 
     const response = ApiResponse.created(UserView.format(session.actor));
     SessionCookie.set(response, session.token, session.expiresAt);
@@ -27,8 +34,20 @@ export const POST = PublicApiHandler(
   },
 );
 
+/** Public so an expired session can still be cleared client-side; logs only when the cookie still resolves. */
 export const DELETE = PublicApiHandler(
-  async () => {
+  async ({ request, repos, requestId, setAuditContext }) => {
+    const token = SessionCookie.read(request);
+    const actor = token ? await Auth.provider().authenticate(repos.users, token) : null;
+    if (actor) {
+      setAuditContext({ actor, requestId });
+      await repos.audit.record({
+        entityType: "user",
+        verb: "signed_out",
+        entityId: actor.id,
+      });
+    }
+
     const response = new NextResponse(null, { status: 204 });
     SessionCookie.clear(response);
     return response;

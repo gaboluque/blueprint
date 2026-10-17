@@ -25,6 +25,10 @@ export class InstitutionsRepo extends BaseRepo<typeof institutions, Institution>
     return new Institution(row);
   }
 
+  protected override institutionIdOf(row: Row<typeof institutions>): string {
+    return row.id;
+  }
+
   findBySlug(slug: string): Promise<Institution | null> {
     return this.findBy({ slug });
   }

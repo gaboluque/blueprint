@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { check, index, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -62,6 +62,29 @@ export const students = pgTable(
   (table) => [index("students_institution_id_idx").on(table.institutionId)],
 );
 
+export const auditEvents = pgTable(
+  "audit_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+    actorId: uuid("actor_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    institutionId: uuid("institution_id").references(() => institutions.id, { onDelete: "restrict" }),
+    requestId: text("request_id"),
+    changes: jsonb("changes").$type<Record<string, unknown>>().notNull().default({}),
+  },
+  (table) => [
+    index("audit_events_entity_idx").on(table.entityType, table.entityId, table.occurredAt),
+    index("audit_events_institution_idx").on(table.institutionId, table.occurredAt),
+    index("audit_events_actor_idx").on(table.actorId, table.occurredAt),
+  ],
+);
+
 export type UserRow = typeof users.$inferSelect;
 export type InstitutionRow = typeof institutions.$inferSelect;
 export type StudentRow = typeof students.$inferSelect;
+export type AuditEventRow = typeof auditEvents.$inferSelect;

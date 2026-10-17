@@ -5,6 +5,7 @@ import {
   desc,
   eq,
   getTableColumns,
+  getTableName,
   gt,
   gte,
   ilike,
@@ -58,6 +59,26 @@ export type FindOptions<T extends PgTable> = {
   offset?: number;
 };
 
+/** Payload the base-repo decorator (and non-row callers) hand to the audit sink. */
+export type AuditEntry = {
+  entityType: string;
+  verb: string;
+  entityId: string;
+  institutionId?: string | null;
+  changes?: Record<string, unknown>;
+};
+
+/** Thin seam over the audit sink so BaseRepo doesn't depend on the audit domain. */
+export type AuditSink = {
+  record(entry: AuditEntry): Promise<unknown>;
+};
+
+/** Everything a repo needs from its registry: the db executor and the shared audit sink. */
+export type RepoContext = {
+  db: DbExecutor;
+  audit: AuditSink;
+};
+
 const OPERATOR_KEYS = new Set(["eq", "neq", "in", "gt", "gte", "lt", "lte", "ilike", "isNull"]);
 
 function isOperatorObject(value: unknown): value is WhereOperators<unknown> {
@@ -84,6 +105,7 @@ function operatorConditions(column: AnyPgColumn, operators: WhereOperators<unkno
 
 /**
  * Generic CRUD over one Drizzle table; maps rows to models via `toModel`.
+ * `create` and `update` auto-record an audit event via the shared sink unless `auditable` is false.
  * Subclasses add named queries only when a `where` object can't express them (joins, aggregates).
  * No hard delete: domains archive or deactivate rows instead.
  */
@@ -92,8 +114,16 @@ export abstract class BaseRepo<TTable extends TableWithId, TModel> {
   protected abstract toModel(row: Row<TTable>): TModel;
   /** Message for unique-constraint violations on insert/update. */
   protected readonly conflictMessage: string = "Ya existe un registro con esos datos.";
+  /** Set to `false` on `AuditEventsRepo` so audit writes don't recursively audit themselves. */
+  protected readonly auditable: boolean = true;
 
-  constructor(protected readonly db: DbExecutor) {}
+  protected readonly db: DbExecutor;
+  protected readonly audit: AuditSink;
+
+  constructor(context: RepoContext) {
+    this.db = context.db;
+    this.audit = context.audit;
+  }
 
   async find(where: Where<TTable> = {}, options: FindOptions<TTable> = {}): Promise<TModel[]> {
     let query = this.db
@@ -144,9 +174,10 @@ export abstract class BaseRepo<TTable extends TableWithId, TModel> {
         .values(values as TTable["$inferInsert"])
         .returning(),
     );
-    const [model] = this.toModels(rows);
-    if (!model) throw new Error(`Insert into ${this.tableLabel()} returned no row`);
-    return model;
+    const [row] = rows as Row<TTable>[];
+    if (!row) throw new Error(`Insert into ${this.tableLabel()} returned no row`);
+    await this.recordAudit("created", row, this.changesFor(values));
+    return this.toModel(row);
   }
 
   /** Returns `null` when no row has that id. */
@@ -158,7 +189,21 @@ export abstract class BaseRepo<TTable extends TableWithId, TModel> {
         .where(eq(this.table.id, id))
         .returning(),
     );
-    return this.toModels(rows)[0] ?? null;
+    const [row] = rows as Row<TTable>[];
+    if (!row) return null;
+    await this.recordAudit("updated", row, this.changesFor(patch));
+    return this.toModel(row);
+  }
+
+  /** Override when the row carries an `institutionId` (students) or _is_ the institution. */
+  protected institutionIdOf(_row: Row<TTable>): string | null {
+    return null;
+  }
+
+  /** Defaults to the table name minus a trailing `s` (`institutions` → `institution`). Override for irregular plurals. */
+  protected entityType(): string {
+    const name = getTableName(this.table);
+    return name.endsWith("s") ? name.slice(0, -1) : name;
   }
 
   protected async countWhere(condition: SQL | undefined): Promise<number> {
@@ -203,6 +248,29 @@ export abstract class BaseRepo<TTable extends TableWithId, TModel> {
 
   protected toModels(rows: readonly unknown[]): TModel[] {
     return rows.map((row) => this.toModel(row as Row<TTable>));
+  }
+
+  private async recordAudit(verb: "created" | "updated", row: Row<TTable>, changes: Record<string, unknown>): Promise<void> {
+    if (!this.auditable) return;
+    const id = (row as { id: string }).id;
+    await this.audit.record({
+      entityType: this.entityType(),
+      verb,
+      entityId: id,
+      institutionId: this.institutionIdOf(row),
+      changes,
+    });
+  }
+
+  /** Strips undefined and auto-managed fields so the stored diff is just what the caller sent. */
+  private changesFor(input: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(input)) {
+      if (value === undefined) continue;
+      if (key === "id" || key === "createdAt" || key === "updatedAt") continue;
+      out[key] = value;
+    }
+    return out;
   }
 
   private columnOf(columns: Record<string, AnyPgColumn>, key: string): AnyPgColumn {

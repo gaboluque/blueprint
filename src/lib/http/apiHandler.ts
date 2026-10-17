@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import type { AuditContext } from "@/domains/audit/auditEvents.repo";
 import { Database } from "@/lib/db/client";
 import { RepoRegistry, type AppRepos } from "@/lib/db/repoRegistry";
 import { ErrorMapping } from "@/lib/errors/errorMapping";
@@ -29,6 +30,8 @@ export type ApiHandlerContext<TActor, P extends Schema, Q extends Schema, B exte
   repos: AppRepos;
   /** Runs `work` with repos bound to one DB transaction. */
   transaction: RepoRegistry["transaction"];
+  /** Lets public routes (sign-in) attach the actor so subsequent audit writes land under their name. */
+  setAuditContext: (context: AuditContext) => void;
   params: Parsed<P>;
   query: Parsed<Q>;
   body: Parsed<B>;
@@ -56,6 +59,21 @@ function queryRecord(request: Request): Record<string, string> {
 
 function actorIdOf(actor: unknown): string | null {
   if (actor && typeof actor === "object" && "id" in actor && typeof actor.id === "string") return actor.id;
+  return null;
+}
+
+/** Narrows an opaque `TActor` to the shape required for audit context (admin actors). */
+function actorForAudit(actor: unknown): AuditContext["actor"] | null {
+  if (!actor || typeof actor !== "object") return null;
+  const candidate = actor as Partial<AuditContext["actor"]>;
+  if (
+    typeof candidate.id === "string" &&
+    typeof candidate.email === "string" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.role === "string"
+  ) {
+    return candidate as AuditContext["actor"];
+  }
   return null;
 }
 
@@ -88,6 +106,8 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
       try {
         const registry = deps.createRegistry();
         actor = await authenticate(request, registry.repos);
+        const auditActor = actorForAudit(actor);
+        if (auditActor) registry.setAuditContext({ actor: auditActor, requestId });
         const params = options.paramsSchema
           ? Validation.parse(options.paramsSchema, await context?.params)
           : undefined;
@@ -102,6 +122,7 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
           actor,
           repos: registry.repos,
           transaction: registry.transaction.bind(registry),
+          setAuditContext: registry.setAuditContext.bind(registry),
           params,
           query,
           body,

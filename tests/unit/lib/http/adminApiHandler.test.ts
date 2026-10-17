@@ -34,7 +34,7 @@ function setup() {
   // Repos are never queried here: auth is faked and handlers don't touch the db.
   const registry = new RepoRegistry({} as DbExecutor);
   const AdminApiHandler = AdminApiHandlerFactory.create(() => provider, { createRegistry: () => registry, logger });
-  return { AdminApiHandler, logger };
+  return { AdminApiHandler, logger, registry };
 }
 
 function makeRequest(
@@ -217,6 +217,19 @@ describe("AdminApiHandler", () => {
     expect(ok.headers.get("x-request-id")).toMatch(/^[0-9a-f-]{36}$/);
     expect(ok.headers.get("x-request-id")).not.toBe("attacker-controlled");
     expect(unauthorized.headers.get("x-request-id")).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  it("sets the audit context from the authenticated actor before the handler runs", async () => {
+    const { AdminApiHandler, registry } = setup();
+    const setAuditContext = jest.spyOn(registry, "setAuditContext");
+    const route = AdminApiHandler(async () => ({}), OPTIONS);
+
+    await route(makeRequest("/api/admin/things", { token: VALID_TOKEN }));
+
+    expect(setAuditContext).toHaveBeenCalledWith({
+      actor: buildAdminActor(),
+      requestId: expect.stringMatching(/^[0-9a-f-]{36}$/),
+    });
   });
 
   it("returns 201 for created results and a paginated envelope for pages", async () => {
