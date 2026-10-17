@@ -1,7 +1,7 @@
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { Passwords } from "@/lib/auth/password";
 import { Database } from "@/lib/db/client";
-import { institutions, students, users } from "@/lib/db/schema";
+import { institutionMembers, institutions, students, users } from "@/lib/db/schema";
 
 // Fake data only. Idempotent: rows are keyed by unique email/slug and skipped when present.
 const DEV_ADMIN = { email: "admin@saludamente.dev", password: "Admin123!", name: "Administradora Dev" };
@@ -9,6 +9,23 @@ const DEV_ADMIN = { email: "admin@saludamente.dev", password: "Admin123!", name:
 const INSTITUTIONS = [
   { name: "Universidad Ficticia del Norte", slug: "u-ficticia-norte", contactEmail: "bienestar@ficticia-norte.test" },
   { name: "Colegio Ejemplo Andino", slug: "colegio-ejemplo-andino", contactEmail: "contacto@ejemplo-andino.test" },
+];
+
+const INSTITUTION_STAFF = [
+  {
+    slug: "u-ficticia-norte",
+    email: "admin@ficticia-norte.test",
+    password: "Staff123!",
+    name: "Admin Institucional Norte",
+    role: "admin" as const,
+  },
+  {
+    slug: "u-ficticia-norte",
+    email: "profesor@ficticia-norte.test",
+    password: "Staff123!",
+    name: "Profesor Demo Norte",
+    role: "teacher" as const,
+  },
 ];
 
 const STUDENTS = [
@@ -40,6 +57,35 @@ async function seed(): Promise<void> {
     .where(inArray(institutions.slug, INSTITUTIONS.map((institution) => institution.slug)));
   const idBySlug = new Map(seeded.map((institution) => [institution.slug, institution.id]));
 
+  for (const member of INSTITUTION_STAFF) {
+    const institutionId = idBySlug.get(member.slug);
+    if (!institutionId) throw new Error(`Seed institution "${member.slug}" is missing`);
+
+    const [user] = await db
+      .insert(users)
+      .values({
+        email: member.email,
+        name: member.name,
+        role: "institution_staff",
+        passwordHash: await Passwords.hash(member.password),
+      })
+      .onConflictDoNothing({ target: users.email })
+      .returning({ id: users.id });
+
+    const userId =
+      user?.id ??
+      (
+        await db.select({ id: users.id }).from(users).where(eq(users.email, member.email))
+      )[0]?.id;
+
+    if (!userId) throw new Error(`Seed staff user "${member.email}" is missing`);
+
+    await db
+      .insert(institutionMembers)
+      .values({ institutionId, userId, role: member.role })
+      .onConflictDoNothing({ target: institutionMembers.userId });
+  }
+
   await db
     .insert(students)
     .values(
@@ -52,6 +98,7 @@ async function seed(): Promise<void> {
     .onConflictDoNothing({ target: students.email });
 
   console.log(`Seed listo. Admin: ${DEV_ADMIN.email} / ${DEV_ADMIN.password}`);
+  console.log(`Staff (u-ficticia-norte): ${INSTITUTION_STAFF.map((m) => `${m.email} / ${m.password}`).join(", ")}`);
 }
 
 seed()

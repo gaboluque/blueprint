@@ -1,4 +1,4 @@
-import type { Actor } from "@/lib/auth/actor";
+import type { Actor, ActorMembership } from "@/lib/auth/actor";
 import type { Row } from "@/lib/db/baseRepo";
 import { BaseModel } from "@/lib/db/baseModel";
 import type { users } from "@/lib/db/schema";
@@ -15,7 +15,18 @@ export class User extends BaseModel<typeof users> {
     return this.role === "admin";
   }
 
-  toActor(): Actor {
-    return { id: this.id, email: this.email, name: this.name, role: this.role };
+  isInstitutionStaff(): boolean {
+    return this.role === "institution_staff";
+  }
+
+  toActor(membership?: ActorMembership): Actor {
+    return {
+      id: this.id,
+      email: this.email,
+      name: this.name,
+      role: this.role,
+      institutionId: membership?.institutionId ?? null,
+      institutionRole: membership?.institutionRole ?? null,
+    };
   }
 }

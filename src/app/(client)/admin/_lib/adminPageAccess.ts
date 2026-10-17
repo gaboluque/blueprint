@@ -1,9 +1,11 @@
 import { AdminRoutes } from "@/frontend/components/admin/adminRoutes";
+import type { Actor } from "@/lib/auth/actor";
+import { Policy } from "@/lib/policy/policy";
 
 export type AdminPageAccessInput = {
   pathname: string;
   hasSessionCookie: boolean;
-  signedIn: boolean;
+  actor: Actor | null;
 };
 
 export type AdminPageDecision = {
@@ -17,10 +19,11 @@ function isLoginPath(pathname: string): boolean {
 }
 
 /** Login is the only `/admin/**` page open to signed-out visitors; signed-in admins skip it. */
-function decide({ pathname, hasSessionCookie, signedIn }: AdminPageAccessInput): AdminPageDecision {
-  const clearSessionCookie = hasSessionCookie && !signedIn;
-  if (isLoginPath(pathname)) return { redirectTo: signedIn ? AdminRoutes.home : null, clearSessionCookie };
-  return { redirectTo: signedIn ? null : AdminRoutes.login, clearSessionCookie };
+function decide({ pathname, hasSessionCookie, actor }: AdminPageAccessInput): AdminPageDecision {
+  const isAdmin = Policy.isAdmin(actor);
+  const clearSessionCookie = hasSessionCookie && actor === null;
+  if (isLoginPath(pathname)) return { redirectTo: isAdmin ? AdminRoutes.home : null, clearSessionCookie };
+  return { redirectTo: isAdmin ? null : AdminRoutes.login, clearSessionCookie };
 }
 
 export const AdminPageAccess = { decide };

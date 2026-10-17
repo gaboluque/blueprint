@@ -8,6 +8,7 @@ const CREATED_AT = new Date("2026-01-15T10:00:00.000Z");
 export const INSTITUTION_ID = "11111111-1111-4111-8111-111111111111";
 export const STUDENT_ID = "22222222-2222-4222-8222-222222222222";
 export const USER_ID = "33333333-3333-4333-8333-333333333333";
+export const STAFF_USER_ID = "44444444-4444-4444-8444-444444444444";
 
 export function buildInstitution(overrides: Partial<InstitutionProps> = {}): Institution {
   return new Institution({
@@ -57,4 +58,27 @@ export function buildUser(overrides: Partial<UserProps> = {}): User {
 
 export function buildAdminActor(): Actor {
   return buildUser().toActor();
+}
+
+export function buildInstitutionStaffUser(overrides: Partial<UserProps> = {}): User {
+  return buildUser({
+    id: STAFF_USER_ID,
+    email: "staff@ficticia.test",
+    name: "Staff Prueba",
+    role: "institution_staff",
+    ...overrides,
+  });
+}
+
+export function buildInstitutionStaffActor(
+  overrides: Partial<Actor> = {},
+  membership: { institutionId?: string; institutionRole?: "admin" | "teacher" } = {},
+): Actor {
+  return {
+    ...buildInstitutionStaffUser().toActor({
+      institutionId: membership.institutionId ?? INSTITUTION_ID,
+      institutionRole: membership.institutionRole ?? "admin",
+    }),
+    ...overrides,
+  };
 }

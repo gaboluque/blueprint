@@ -1,45 +1,56 @@
 import { AdminPageAccess } from "@/app/(client)/admin/_lib/adminPageAccess";
+import { buildAdminActor, buildInstitutionStaffActor } from "../../../factories/models";
 
 describe("AdminPageAccess.decide", () => {
-  it("sends signed-out visitors of panel pages to login", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin/institutions", hasSessionCookie: false, signedIn: false });
+  it("sends signed-out visitors to login", () => {
+    const decision = AdminPageAccess.decide({ pathname: "/admin/institutions", hasSessionCookie: false, actor: null });
 
     expect(decision).toEqual({ redirectTo: "/admin/login", clearSessionCookie: false });
   });
 
-  it("shows login to signed-out visitors instead of redirecting it to itself", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin/login", hasSessionCookie: false, signedIn: false });
+  it("lets signed-out visitors stay on login", () => {
+    const decision = AdminPageAccess.decide({ pathname: "/admin/login", hasSessionCookie: false, actor: null });
 
     expect(decision).toEqual({ redirectTo: null, clearSessionCookie: false });
   });
 
-  it("lets a valid session into panel pages", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin", hasSessionCookie: true, signedIn: true });
+  it("sends signed-in admins from login to the panel home", () => {
+    const decision = AdminPageAccess.decide({ pathname: "/admin", hasSessionCookie: true, actor: buildAdminActor() });
 
     expect(decision).toEqual({ redirectTo: null, clearSessionCookie: false });
   });
 
-  it("sends a valid session away from login to the panel", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin/login", hasSessionCookie: true, signedIn: true });
+  it("sends signed-in admins away from login", () => {
+    const decision = AdminPageAccess.decide({ pathname: "/admin/login", hasSessionCookie: true, actor: buildAdminActor() });
 
     expect(decision).toEqual({ redirectTo: "/admin", clearSessionCookie: false });
   });
 
-  it("treats an invalid cookie as signed out on panel pages and clears it", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin/institutions", hasSessionCookie: true, signedIn: false });
+  it("treats a garbage cookie as signed out and clears it", () => {
+    const decision = AdminPageAccess.decide({ pathname: "/admin/institutions", hasSessionCookie: true, actor: null });
 
     expect(decision).toEqual({ redirectTo: "/admin/login", clearSessionCookie: true });
   });
 
-  it("shows login for an invalid cookie and clears it, so login doesn't bounce back to the panel", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin/login", hasSessionCookie: true, signedIn: false });
+  it("keeps garbage-cookie visitors on login without clearing again", () => {
+    const decision = AdminPageAccess.decide({ pathname: "/admin/login", hasSessionCookie: true, actor: null });
 
     expect(decision).toEqual({ redirectTo: null, clearSessionCookie: true });
   });
 
-  it("doesn't treat paths that only share the login prefix as login", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin/loginx", hasSessionCookie: false, signedIn: false });
+  it("does not treat login-like paths as login", () => {
+    const decision = AdminPageAccess.decide({ pathname: "/admin/loginx", hasSessionCookie: false, actor: null });
 
     expect(decision.redirectTo).toBe("/admin/login");
+  });
+
+  it("sends institution staff to login without clearing a valid session cookie", () => {
+    const decision = AdminPageAccess.decide({
+      pathname: "/admin/institutions",
+      hasSessionCookie: true,
+      actor: buildInstitutionStaffActor(),
+    });
+
+    expect(decision).toEqual({ redirectTo: "/admin/login", clearSessionCookie: false });
   });
 });

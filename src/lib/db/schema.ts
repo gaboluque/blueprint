@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { check, index, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -11,11 +11,13 @@ const timestamps = {
 
 export const institutionStatus = pgEnum("institution_status", ["active", "archived"]);
 export const studentStatus = pgEnum("student_status", ["active", "inactive"]);
-export const userRole = pgEnum("user_role", ["admin"]);
+export const userRole = pgEnum("user_role", ["admin", "institution_staff"]);
+export const institutionMemberRole = pgEnum("institution_member_role", ["admin", "teacher"]);
 
 export type InstitutionStatus = (typeof institutionStatus.enumValues)[number];
 export type StudentStatus = (typeof studentStatus.enumValues)[number];
 export type UserRole = (typeof userRole.enumValues)[number];
+export type InstitutionMemberRole = (typeof institutionMemberRole.enumValues)[number];
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -62,6 +64,26 @@ export const students = pgTable(
   (table) => [index("students_institution_id_idx").on(table.institutionId)],
 );
 
+export const institutionMembers = pgTable(
+  "institution_members",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    institutionId: uuid("institution_id")
+      .notNull()
+      .references(() => institutions.id, { onDelete: "restrict" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    role: institutionMemberRole("role").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("institution_members_user_id_unique").on(table.userId),
+    uniqueIndex("institution_members_institution_user_unique").on(table.institutionId, table.userId),
+    index("institution_members_institution_id_idx").on(table.institutionId),
+  ],
+);
+
 export const auditEvents = pgTable(
   "audit_events",
   {
@@ -87,4 +109,5 @@ export const auditEvents = pgTable(
 export type UserRow = typeof users.$inferSelect;
 export type InstitutionRow = typeof institutions.$inferSelect;
 export type StudentRow = typeof students.$inferSelect;
+export type InstitutionMemberRow = typeof institutionMembers.$inferSelect;
 export type AuditEventRow = typeof auditEvents.$inferSelect;

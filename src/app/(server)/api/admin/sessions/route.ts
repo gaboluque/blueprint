@@ -13,8 +13,8 @@ const INVALID_CREDENTIALS_MESSAGE = "Correo o contraseña incorrectos.";
 
 export const POST = PublicApiHandler(
   async ({ body, repos, requestId, setAuditContext }) => {
-    const session = await Auth.provider().signIn(repos.users, body);
-    if (!session) throw new UnauthorizedError(INVALID_CREDENTIALS_MESSAGE);
+    const session = await Auth.provider().signIn(repos, body);
+    if (!session || session.actor.role !== "admin") throw new UnauthorizedError(INVALID_CREDENTIALS_MESSAGE);
 
     setAuditContext({ actor: session.actor, requestId });
     await repos.audit.record({
@@ -38,7 +38,7 @@ export const POST = PublicApiHandler(
 export const DELETE = PublicApiHandler(
   async ({ request, repos, requestId, setAuditContext }) => {
     const token = SessionCookie.read(request);
-    const actor = token ? await Auth.provider().authenticate(repos.users, token) : null;
+    const actor = token ? await Auth.provider().authenticate(repos, token) : null;
     if (actor) {
       setAuditContext({ actor, requestId });
       await repos.audit.record({

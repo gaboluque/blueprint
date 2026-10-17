@@ -1,6 +1,7 @@
 import { errors, jwtVerify, SignJWT } from "jose";
 import type { Actor } from "./actor";
-import type { AuthProvider, AuthSession, Credentials, UserLookup } from "./auth.port";
+import { ActorResolver } from "./actorResolver";
+import type { AuthProvider, AuthRepos, AuthSession, Credentials } from "./auth.port";
 import { Passwords } from "./password";
 
 const ALGORITHM = "HS256";
@@ -49,19 +50,21 @@ function create({ secret, ttlSeconds = DEFAULT_TTL_SECONDS, now = () => new Date
   }
 
   return {
-    async signIn(users: UserLookup, { email, password }: Credentials) {
-      const user = await users.findByEmail(email);
+    async signIn(repos: AuthRepos, { email, password }: Credentials) {
+      const user = await repos.users.findByEmail(email);
       const passwordMatches = await Passwords.verify(password, user?.passwordHash ?? TIMING_EQUALIZER_HASH);
-      if (!user || !passwordMatches || !user.isAdmin()) return null;
-      return issue(user.toActor());
+      if (!user || !passwordMatches) return null;
+      const actor = await ActorResolver.resolve(repos, user);
+      if (!actor) return null;
+      return issue(actor);
     },
 
-    async authenticate(users: UserLookup, token: string) {
+    async authenticate(repos: AuthRepos, token: string) {
       const userId = await verifiedSubject(token);
       if (!userId) return null;
-      const user = await users.findById(userId);
-      if (!user?.isAdmin()) return null;
-      return user.toActor();
+      const user = await repos.users.findById(userId);
+      if (!user) return null;
+      return ActorResolver.resolve(repos, user);
     },
   };
 }

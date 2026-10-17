@@ -1,4 +1,5 @@
 import { AuditEventsRepo, type AuditContext } from "@/domains/audit/auditEvents.repo";
+import { InstitutionMembersRepo } from "@/domains/institutionMembers/institutionMembers.repo";
 import { InstitutionsRepo } from "@/domains/institutions/institutions.repo";
 import { StudentsRepo } from "@/domains/students/students.repo";
 import { UsersRepo } from "@/domains/users/users.repo";
@@ -7,6 +8,7 @@ import type { DbExecutor } from "./client";
 
 export type AppRepos = {
   users: UsersRepo;
+  institutionMembers: InstitutionMembersRepo;
   institutions: InstitutionsRepo;
   students: StudentsRepo;
   audit: AuditEventsRepo;
@@ -24,6 +26,7 @@ export class RepoRegistry {
     const context: RepoContext = { db, audit: sink };
     this.repos = {
       users: new UsersRepo(context),
+      institutionMembers: new InstitutionMembersRepo(context),
       institutions: new InstitutionsRepo(context),
       students: new StudentsRepo(context),
       audit: auditRepo,

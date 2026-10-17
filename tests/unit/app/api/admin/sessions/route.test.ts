@@ -2,7 +2,7 @@ import { DELETE, POST } from "@/app/(server)/api/admin/sessions/route";
 import type { AuthSession } from "@/lib/auth/auth.port";
 import { SessionCookie } from "@/lib/auth/sessionCookie";
 import { RouteTestSupport } from "../institutions/routeTestSupport";
-import { buildAdminActor } from "../../../../../factories/models";
+import { buildAdminActor, buildInstitutionStaffActor } from "../../../../../factories/models";
 
 const mockAuthProvider = RouteTestSupport.authProvider();
 const mockDb = RouteTestSupport.fakeDb();
@@ -36,6 +36,23 @@ describe("POST /api/admin/sessions", () => {
 
     expect(response.status).toBe(201);
     expect(mockRecord).toHaveBeenCalledWith({ entityType: "user", verb: "signed_in", entityId: actor.id });
+  });
+
+  it("rejects institution staff even when credentials match", async () => {
+    const actor = buildInstitutionStaffActor();
+    const session: AuthSession = { actor, token: "token", expiresAt: new Date("2027-01-01T00:00:00.000Z") };
+    (mockAuthProvider.signIn as jest.Mock).mockResolvedValue(session);
+
+    const response = await POST(
+      RouteTestSupport.request(PATH, {
+        method: "POST",
+        body: { email: actor.email, password: "secreta" },
+        signedIn: false,
+      }),
+    );
+
+    expect(response.status).toBe(401);
+    expect(mockRecord).not.toHaveBeenCalled();
   });
 
   it("does not record an event when credentials are rejected", async () => {

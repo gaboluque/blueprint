@@ -10,6 +10,8 @@ const admin = {
   email: "a@ficticia.test",
   name: "Admin",
   role: "admin" as const,
+  institutionId: null,
+  institutionRole: null,
 };
 
 function requestTo(path: string, cookie?: string): NextRequest {

@@ -9,7 +9,7 @@ import { HandlerResults } from "@/lib/http/handlerResults";
 import type { Logger } from "@/lib/observability/logger";
 import { paginationQuerySchema } from "@/lib/pagination";
 import { idParamsSchema } from "@/lib/validation/schemas";
-import { buildAdminActor, INSTITUTION_ID } from "../../../factories/models";
+import { buildAdminActor, buildInstitutionStaffActor, INSTITUTION_ID } from "../../../factories/models";
 
 const VALID_TOKEN = "valid-token";
 const OPTIONS = { route: "TEST /api/admin/things", fallbackError: "No pudimos completar la solicitud." };
@@ -74,6 +74,23 @@ describe("AdminApiHandler", () => {
 
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ ok: false, error: "Tu sesión expiró. Inicia sesión de nuevo." });
+  });
+
+  it("returns 401 for a valid institution staff session", async () => {
+    const provider: AuthProvider = {
+      signIn: jest.fn(),
+      authenticate: jest.fn(async () => buildInstitutionStaffActor()),
+    };
+    const logger = makeLogger();
+    const registry = new RepoRegistry({} as DbExecutor);
+    const AdminApiHandler = AdminApiHandlerFactory.create(() => provider, { createRegistry: () => registry, logger });
+    const handler = jest.fn();
+    const route = AdminApiHandler(handler, OPTIONS);
+
+    const response = await route(makeRequest("/api/admin/things", { token: VALID_TOKEN }));
+
+    expect(response.status).toBe(401);
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it("authenticates before reading the body", async () => {

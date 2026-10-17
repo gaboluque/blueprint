@@ -9,7 +9,7 @@ import { RepoRegistry } from "@/lib/db/repoRegistry";
  */
 async function resolve(token: string | undefined): Promise<Actor | null> {
   if (!token) return null;
-  return Auth.provider().authenticate(new RepoRegistry(Database.get()).repos.users, token);
+  return Auth.provider().authenticate(new RepoRegistry(Database.get()).repos, token);
 }
 
 export const AdminSessionResolver = { resolve };

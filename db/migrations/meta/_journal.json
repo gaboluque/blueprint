@@ -15,6 +15,13 @@
       "when": 1792250721362,
       "tag": "0001_add_audit_events",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792255424871,
+      "tag": "0002_add_institution_staff_and_members",
+      "breakpoints": true
     }
   ]
 }

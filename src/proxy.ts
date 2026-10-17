@@ -6,11 +6,11 @@ import { SessionCookie } from "@/lib/auth/sessionCookie";
 /** Page access for `/admin/**`. `/api` stays with `AdminApiHandler`. */
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get(SessionCookie.name)?.value;
-  const admin = await AdminSessionResolver.resolve(token);
+  const actor = await AdminSessionResolver.resolve(token);
   const decision = AdminPageAccess.decide({
     pathname: request.nextUrl.pathname,
     hasSessionCookie: Boolean(token),
-    signedIn: admin !== null,
+    actor,
   });
 
   const response = decision.redirectTo
