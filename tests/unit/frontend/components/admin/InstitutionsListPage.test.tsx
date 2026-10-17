@@ -1,0 +1,102 @@
+/** @jest-environment jsdom */
+import "@testing-library/jest-dom";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { AdminInstitutions } from "@/frontend/gateway/institutions";
+import { AdminSession } from "@/frontend/gateway/session";
+import { InstitutionsListPage } from "@/frontend/features/institutions/InstitutionsListPage";
+import { institutionListItemDto } from "../../../../factories/dtos";
+import { mockRouter } from "../../../../helpers/nextNavigation";
+
+jest.mock("next/navigation", () => ({ useRouter: () => mockRouter }));
+jest.mock("@/frontend/gateway/institutions", () => ({ AdminInstitutions: { list: jest.fn(), create: jest.fn() } }));
+jest.mock("@/frontend/gateway/session", () => ({ AdminSession: { signOut: jest.fn() } }));
+
+const list = jest.mocked(AdminInstitutions.list);
+
+const norte = institutionListItemDto({ id: "a0000000-0000-4000-8000-000000000001", name: "Norte", studentCount: 3 });
+const sur = institutionListItemDto({
+  id: "a0000000-0000-4000-8000-000000000002",
+  name: "Sur",
+  slug: "sur",
+  status: "archived",
+  archivedAt: "2026-02-01T10:00:00.000Z",
+});
+
+describe("InstitutionsListPage", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    list.mockResolvedValue({ ok: true, data: [norte, sur], pagination: { page: 1, pageSize: 20, total: 2 } });
+  });
+
+  it("renders each institution with its student count, status, and detail link", async () => {
+    render(<InstitutionsListPage />);
+
+    await screen.findByRole("link", { name: "Norte" });
+    const [, norteRow, surRow] = screen.getAllByRole("row");
+    expect(within(norteRow as HTMLElement).getByRole("link", { name: "Norte" })).toHaveAttribute(
+      "href",
+      `/admin/institutions/${norte.id}`,
+    );
+    expect(within(norteRow as HTMLElement).getByRole("cell", { name: "3" })).toBeInTheDocument();
+    expect(within(norteRow as HTMLElement).getByText("Activa")).toBeInTheDocument();
+    expect(within(surRow as HTMLElement).getByText("Archivada")).toBeInTheDocument();
+    expect(screen.getByText(/Página 1 de 1 · 2 resultados/)).toBeInTheDocument();
+  });
+
+  it("refetches from page 1 when the status filter changes", async () => {
+    render(<InstitutionsListPage />);
+    await screen.findByRole("link", { name: "Norte" });
+
+    await userEvent.selectOptions(screen.getByLabelText("Estado"), "archived");
+
+    expect(list).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, status: "archived" }));
+  });
+
+  it("applies the search only when it is submitted", async () => {
+    render(<InstitutionsListPage />);
+    await screen.findByRole("link", { name: "Norte" });
+
+    await userEvent.type(screen.getByLabelText("Buscar por nombre o slug"), "  norte ");
+    const callsWhileTyping = list.mock.calls.length;
+    await userEvent.click(screen.getByRole("button", { name: "Buscar" }));
+
+    expect(callsWhileTyping).toBe(1);
+    expect(list).toHaveBeenLastCalledWith(expect.objectContaining({ search: "norte", page: 1 }));
+  });
+
+  it("shows a load error inline and retries on demand", async () => {
+    list.mockResolvedValueOnce({ ok: false, status: 500, error: "No pudimos cargar las instituciones." });
+    render(<InstitutionsListPage />);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("No pudimos cargar las instituciones.");
+    await userEvent.click(within(alert).getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByRole("link", { name: "Norte" })).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("signs out before sending the user to login when the session expired, so login can't bounce back", async () => {
+    jest.mocked(AdminSession.signOut).mockResolvedValue({ ok: true, data: null });
+    list.mockResolvedValueOnce({ ok: false, status: 401, error: "Tu sesión expiró. Inicia sesión de nuevo." });
+
+    render(<InstitutionsListPage />);
+
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith("/admin/login"));
+    expect(AdminSession.signOut).toHaveBeenCalled();
+    expect(jest.mocked(AdminSession.signOut).mock.invocationCallOrder[0]).toBeLessThan(
+      mockRouter.replace.mock.invocationCallOrder[0] ?? 0,
+    );
+  });
+
+  it("doesn't sign out on errors other than 401", async () => {
+    list.mockResolvedValueOnce({ ok: false, status: 500, error: "No pudimos cargar las instituciones." });
+
+    render(<InstitutionsListPage />);
+
+    await screen.findByRole("alert");
+    expect(AdminSession.signOut).not.toHaveBeenCalled();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+});
