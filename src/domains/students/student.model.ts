@@ -1,45 +1,20 @@
-import type { StudentStatus } from "@/lib/db/schema";
-import type { AppRepos } from "@/lib/db/repoRegistry";
 import type { Institution } from "@/domains/institutions/institution.model";
+import { BaseModel } from "@/lib/db/baseModel";
+import type { Row } from "@/lib/db/baseRepo";
+import type { AppRepos } from "@/lib/db/repoRegistry";
+import type { students } from "@/lib/db/schema";
 import { StudentErrors } from "./student.errors";
+
+export type StudentProps = Row<typeof students>;
 
 export type StudentDeactivatePatch = {
   status: "inactive";
 };
 
-export type StudentProps = {
-  id: string;
-  institutionId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  documentId: string;
-  status: StudentStatus;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export class Student {
-  readonly id: string;
-  readonly institutionId: string;
-  readonly firstName: string;
-  readonly lastName: string;
-  readonly email: string;
-  readonly documentId: string;
-  readonly status: StudentStatus;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-
-  constructor(props: StudentProps) {
-    this.id = props.id;
-    this.institutionId = props.institutionId;
-    this.firstName = props.firstName;
-    this.lastName = props.lastName;
-    this.email = props.email;
-    this.documentId = props.documentId;
-    this.status = props.status;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+export interface Student extends Readonly<StudentProps> {}
+export class Student extends BaseModel<typeof students> {
+  constructor(row: StudentProps) {
+    super(row);
   }
 
   isActive(): boolean {

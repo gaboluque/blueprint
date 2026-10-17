@@ -6,6 +6,7 @@ import type { DbExecutor } from "@/lib/db/client";
 import { RepoRegistry } from "@/lib/db/repoRegistry";
 import { AdminApiHandlerFactory } from "@/lib/http/adminApiHandler";
 import { HandlerResults } from "@/lib/http/handlerResults";
+import type { Logger } from "@/lib/observability/logger";
 import { paginationQuerySchema } from "@/lib/pagination";
 import { idParamsSchema } from "@/lib/validation/schemas";
 import { buildAdminActor, INSTITUTION_ID } from "../../../factories/models";
@@ -14,12 +15,22 @@ const VALID_TOKEN = "valid-token";
 const OPTIONS = { route: "TEST /api/admin/things", fallbackError: "No pudimos completar la solicitud." };
 const bodySchema = z.strictObject({ name: z.string().min(1) });
 
+function makeLogger(): jest.Mocked<Logger> {
+  const logger: jest.Mocked<Logger> = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    child: jest.fn((_bindings: Record<string, unknown>) => logger),
+  };
+  return logger;
+}
+
 function setup() {
   const provider: AuthProvider = {
     signIn: jest.fn(),
     authenticate: jest.fn(async (_users, token: string) => (token === VALID_TOKEN ? buildAdminActor() : null)),
   };
-  const logger = { error: jest.fn() };
+  const logger = makeLogger();
   // Repos are never queried here: auth is faked and handlers don't touch the db.
   const registry = new RepoRegistry({} as DbExecutor);
   const AdminApiHandler = AdminApiHandlerFactory.create(() => provider, { createRegistry: () => registry, logger });
@@ -142,7 +153,7 @@ describe("AdminApiHandler", () => {
     expect(response.status).toBe(415);
   });
 
-  it("maps domain errors to their status and message", async () => {
+  it("maps domain errors to their status and message, logging them as warnings", async () => {
     const { AdminApiHandler, logger } = setup();
     const route = AdminApiHandler(async () => {
       throw InstitutionErrors.notFound();
@@ -153,9 +164,13 @@ describe("AdminApiHandler", () => {
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({ ok: false, error: "No encontramos la institución." });
     expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 404, err: expect.objectContaining({ name: "NotFoundError" }) }),
+      "request_failed",
+    );
   });
 
-  it("logs unexpected errors and returns the fallback message", async () => {
+  it("logs unexpected errors with stack and returns the fallback message", async () => {
     const { AdminApiHandler, logger } = setup();
     const failure = new Error("relation does not exist");
     const route = AdminApiHandler(async () => {
@@ -166,7 +181,42 @@ describe("AdminApiHandler", () => {
 
     expect(response.status).toBe(500);
     expect(await response.json()).toEqual({ ok: false, error: OPTIONS.fallbackError });
-    expect(logger.error).toHaveBeenCalledWith(OPTIONS.route, failure);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 500,
+        actorId: buildAdminActor().id,
+        err: expect.objectContaining({ name: "Error", message: "relation does not exist", stack: expect.any(String) }),
+      }),
+      "request_failed",
+    );
+  });
+
+  it("logs one info line per successful request with status, duration, and actorId", async () => {
+    const { AdminApiHandler, logger } = setup();
+    const route = AdminApiHandler(async () => ({ ok: true }), OPTIONS);
+
+    await route(makeRequest("/api/admin/things", { token: VALID_TOKEN }));
+
+    expect(logger.child).toHaveBeenCalledWith({ requestId: expect.any(String), route: OPTIONS.route, method: "GET" });
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 200, actorId: buildAdminActor().id, durationMs: expect.any(Number) }),
+      "request",
+    );
+  });
+
+  it("mints a server-side x-request-id on success and error, ignoring any inbound header", async () => {
+    const { AdminApiHandler } = setup();
+    const route = AdminApiHandler(async () => ({}), OPTIONS);
+    const spoofed = new Request("http://localhost/api/admin/things", {
+      headers: { cookie: `${SessionCookie.name}=${VALID_TOKEN}`, "x-request-id": "attacker-controlled" },
+    });
+
+    const ok = await route(spoofed);
+    const unauthorized = await route(makeRequest("/api/admin/things"));
+
+    expect(ok.headers.get("x-request-id")).toMatch(/^[0-9a-f-]{36}$/);
+    expect(ok.headers.get("x-request-id")).not.toBe("attacker-controlled");
+    expect(unauthorized.headers.get("x-request-id")).toMatch(/^[0-9a-f-]{36}$/);
   });
 
   it("returns 201 for created results and a paginated envelope for pages", async () => {

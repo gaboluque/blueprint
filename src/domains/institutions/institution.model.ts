@@ -1,45 +1,23 @@
-import type { InstitutionStatus } from "@/lib/db/schema";
-import type { PaginationQuery, PaginationResult } from "@/lib/pagination";
-import type { AppRepos } from "@/lib/db/repoRegistry";
-import type { StudentListFilters } from "@/domains/students/students.repo";
 import type { Student } from "@/domains/students/student.model";
+import type { StudentListFilters } from "@/domains/students/students.repo";
+import { BaseModel } from "@/lib/db/baseModel";
+import type { Row } from "@/lib/db/baseRepo";
+import type { AppRepos } from "@/lib/db/repoRegistry";
+import type { institutions } from "@/lib/db/schema";
+import type { PaginationQuery, PaginationResult } from "@/lib/pagination";
 import { InstitutionErrors } from "./institution.errors";
 
-export type InstitutionProps = {
-  id: string;
-  name: string;
-  slug: string;
-  contactEmail: string;
-  status: InstitutionStatus;
-  archivedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type InstitutionProps = Row<typeof institutions>;
 
 export type InstitutionArchivePatch = {
   status: "archived";
   archivedAt: Date;
 };
 
-export class Institution {
-  readonly id: string;
-  readonly name: string;
-  readonly slug: string;
-  readonly contactEmail: string;
-  readonly status: InstitutionStatus;
-  readonly archivedAt: Date | null;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-
-  constructor(props: InstitutionProps) {
-    this.id = props.id;
-    this.name = props.name;
-    this.slug = props.slug;
-    this.contactEmail = props.contactEmail;
-    this.status = props.status;
-    this.archivedAt = props.archivedAt;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+export interface Institution extends Readonly<InstitutionProps> {}
+export class Institution extends BaseModel<typeof institutions> {
+  constructor(row: InstitutionProps) {
+    super(row);
   }
 
   isArchived(): boolean {

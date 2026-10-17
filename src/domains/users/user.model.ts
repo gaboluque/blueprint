@@ -1,34 +1,14 @@
 import type { Actor } from "@/lib/auth/actor";
-import type { UserRole } from "@/lib/db/schema";
+import type { Row } from "@/lib/db/baseRepo";
+import { BaseModel } from "@/lib/db/baseModel";
+import type { users } from "@/lib/db/schema";
 
-export type UserProps = {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  passwordHash: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type UserProps = Row<typeof users>;
 
-export class User {
-  readonly id: string;
-  readonly email: string;
-  readonly name: string;
-  readonly role: UserRole;
-  /** Never leaves the server; views must not include it. */
-  readonly passwordHash: string;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-
-  constructor(props: UserProps) {
-    this.id = props.id;
-    this.email = props.email;
-    this.name = props.name;
-    this.role = props.role;
-    this.passwordHash = props.passwordHash;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+export interface User extends Readonly<UserProps> {}
+export class User extends BaseModel<typeof users> {
+  constructor(row: UserProps) {
+    super(row);
   }
 
   isAdmin(): boolean {

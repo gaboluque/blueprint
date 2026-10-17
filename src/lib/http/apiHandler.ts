@@ -2,7 +2,8 @@ import type { z } from "zod";
 import { Database } from "@/lib/db/client";
 import { RepoRegistry, type AppRepos } from "@/lib/db/repoRegistry";
 import { ErrorMapping } from "@/lib/errors/errorMapping";
-import { ConsoleLogger, type Logger } from "@/lib/observability/logger";
+import { AppLogger, type Logger } from "@/lib/observability/logger";
+import { RequestId } from "@/lib/observability/requestId";
 import { Validation } from "@/lib/validation/validation";
 import { ApiResponse } from "./apiResponse";
 import { HandlerResults } from "./handlerResults";
@@ -23,6 +24,7 @@ export type ApiHandlerOptions<P extends Schema, Q extends Schema, B extends Sche
 
 export type ApiHandlerContext<TActor, P extends Schema, Q extends Schema, B extends Schema> = {
   request: Request;
+  requestId: string;
   actor: TActor;
   repos: AppRepos;
   /** Runs `work` with repos bound to one DB transaction. */
@@ -43,17 +45,30 @@ export type ApiHandlerDeps = {
 
 const defaultDeps: ApiHandlerDeps = {
   createRegistry: () => new RepoRegistry(Database.get()),
-  logger: ConsoleLogger,
+  get logger() {
+    return AppLogger.get();
+  },
 };
 
 function queryRecord(request: Request): Record<string, string> {
   return Object.fromEntries(new URL(request.url).searchParams);
 }
 
+function actorIdOf(actor: unknown): string | null {
+  if (actor && typeof actor === "object" && "id" in actor && typeof actor.id === "string") return actor.id;
+  return null;
+}
+
+function withRequestId(response: Response, requestId: string): Response {
+  response.headers.set(RequestId.headerName, requestId);
+  return response;
+}
+
 /**
  * Order: authenticate → validate params/query/body → handler → map errors → envelope.
  * Auth runs before the body is read. The handler returns a plain value (200), a
  * `HandlerResults` value (201/204/paginated), or a `Response` (passed through).
+ * Every response carries `x-request-id` and produces one structured log line.
  */
 function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDeps = defaultDeps) {
   return function apiHandler<
@@ -65,9 +80,14 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
     options: ApiHandlerOptions<P, Q, B>,
   ) {
     return async (request: Request, context?: RouteContext): Promise<Response> => {
+      const requestId = RequestId.mint();
+      const log = deps.logger.child({ requestId, route: options.route, method: request.method });
+      const startedAt = performance.now();
+      let actor: TActor | null = null;
+
       try {
         const registry = deps.createRegistry();
-        const actor = await authenticate(request, registry.repos);
+        actor = await authenticate(request, registry.repos);
         const params = options.paramsSchema
           ? Validation.parse(options.paramsSchema, await context?.params)
           : undefined;
@@ -78,6 +98,7 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
 
         const ctx = {
           request,
+          requestId,
           actor,
           repos: registry.repos,
           transaction: registry.transaction.bind(registry),
@@ -86,11 +107,33 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
           body,
         } as ApiHandlerContext<TActor, P, Q, B>;
 
-        return HandlerResults.toResponse(await handler(ctx));
+        const response = withRequestId(HandlerResults.toResponse(await handler(ctx)), requestId);
+        log.info(
+          { status: response.status, durationMs: Math.round(performance.now() - startedAt), actorId: actorIdOf(actor) },
+          "request",
+        );
+        return response;
       } catch (error) {
         const mapped = ErrorMapping.map(error, options.fallbackError);
-        if (!mapped.expected) deps.logger.error(options.route, error);
-        return ApiResponse.error(mapped.message, mapped.status, mapped.fieldErrors);
+        const response = withRequestId(
+          ApiResponse.error(mapped.message, mapped.status, mapped.fieldErrors),
+          requestId,
+        );
+        const payload = {
+          status: mapped.status,
+          durationMs: Math.round(performance.now() - startedAt),
+          actorId: actorIdOf(actor),
+          err: error instanceof Error ? { name: error.name, message: error.message } : { cause: String(error) },
+        };
+        if (mapped.expected) {
+          log.warn(payload, "request_failed");
+        } else {
+          log.error(
+            { ...payload, err: error instanceof Error ? { ...payload.err, stack: error.stack } : payload.err },
+            "request_failed",
+          );
+        }
+        return response;
       }
     };
   };

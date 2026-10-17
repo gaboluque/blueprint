@@ -15,6 +15,14 @@ export default defineConfig([
     },
   },
   {
+    // Domain models merge `Row<typeof table>` onto the class via an empty same-name interface so columns become typed instance properties. The runtime side (`Object.assign(this, row)` in `BaseModel`) backs every merged field.
+    files: ["src/domains/**/*.model.ts"],
+    rules: {
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-unsafe-declaration-merging": "off",
+    },
+  },
+  {
     files: ["src/frontend/**", "src/app/**/page.tsx", "src/app/**/layout.tsx"],
     rules: {
       "no-restricted-imports": [
