@@ -1,6 +1,9 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import boundaries from "eslint-plugin-boundaries";
+import sonarjs from "eslint-plugin-sonarjs";
+import { boundariesDependenciesRule, boundariesSettings } from "./eslint.boundaries.mjs";
 
 export default defineConfig([
   ...nextVitals,
@@ -12,6 +15,24 @@ export default defineConfig([
       "@typescript-eslint/consistent-type-imports": "error",
       // Policy signatures take the resource before they use it, so later relationship checks don't change call sites.
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    },
+  },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: { boundaries, sonarjs },
+    settings: boundariesSettings,
+    rules: {
+      complexity: ["error", { max: 15 }],
+      "max-depth": ["error", 4],
+      "sonarjs/cognitive-complexity": ["error", 15],
+      "boundaries/dependencies": ["error", boundariesDependenciesRule],
+      "boundaries/no-unknown-files": "error",
+    },
+  },
+  {
+    files: ["tests/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
   {

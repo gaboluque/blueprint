@@ -132,6 +132,8 @@ Every test uses **Arrange–Act–Assert**: set up data and dependencies, invoke
 
 `make lint` · `make typecheck` · `make test` must be green before you call work done.
 
+**ESLint architecture.** `eslint.boundaries.mjs` defines layers (`frontend`, `app-ui`, `app-api`, `domains`, `lib`) and file categories (repos, services, views, …). `boundaries/dependencies` enforces import direction; complexity rules (`complexity`, `sonarjs/cognitive-complexity`, `max-depth`) apply under `src/**` only.
+
 API contract for the next slices: [`_docs`](_docs/api-contracts.md).
 
 <!-- BEGIN:nextjs-agent-rules -->
