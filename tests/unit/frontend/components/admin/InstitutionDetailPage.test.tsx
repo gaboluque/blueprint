@@ -5,9 +5,9 @@ import userEvent from "@testing-library/user-event";
 import { AdminInstitutions } from "@/frontend/gateway/institutions";
 import { InstitutionDetailPage } from "@/frontend/features/institutions/InstitutionDetailPage";
 import { institutionDto } from "../../../../factories/dtos";
-import { mockRouter } from "../../../../helpers/nextNavigation";
+import { installMockRouterUrlSync, mockPathname, setMockSearchParams } from "../../../../helpers/nextNavigation";
 
-jest.mock("next/navigation", () => ({ useRouter: () => mockRouter }));
+jest.mock("next/navigation", () => require("../../../../helpers/nextNavigation").createNextNavigationMock());
 jest.mock("@/frontend/gateway/session", () => ({ AdminSession: { signOut: jest.fn() } }));
 jest.mock("@/frontend/gateway/institutions", () => ({
   AdminInstitutions: { get: jest.fn(), update: jest.fn(), archive: jest.fn(), listStudents: jest.fn(), createStudent: jest.fn() },
@@ -25,6 +25,9 @@ async function openArchiveDialog() {
 describe("InstitutionDetailPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockSearchParams();
+    installMockRouterUrlSync();
+    mockPathname.current = `/admin/institutions/${institution.id}`;
     jest.mocked(AdminInstitutions.get).mockResolvedValue({ ok: true, data: institution });
     jest.mocked(AdminInstitutions.listStudents).mockResolvedValue({
       ok: true,

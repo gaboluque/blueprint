@@ -6,9 +6,9 @@ import { AdminInstitutions } from "@/frontend/gateway/institutions";
 import { AdminSession } from "@/frontend/gateway/session";
 import { InstitutionsListPage } from "@/frontend/features/institutions/InstitutionsListPage";
 import { institutionListItemDto } from "../../../../factories/dtos";
-import { mockRouter } from "../../../../helpers/nextNavigation";
+import { installMockRouterUrlSync, mockPathname, mockRouter, setMockSearchParams } from "../../../../helpers/nextNavigation";
 
-jest.mock("next/navigation", () => ({ useRouter: () => mockRouter }));
+jest.mock("next/navigation", () => require("../../../../helpers/nextNavigation").createNextNavigationMock());
 jest.mock("@/frontend/gateway/institutions", () => ({ AdminInstitutions: { list: jest.fn(), create: jest.fn() } }));
 jest.mock("@/frontend/gateway/session", () => ({ AdminSession: { signOut: jest.fn() } }));
 
@@ -26,6 +26,9 @@ const sur = institutionListItemDto({
 describe("InstitutionsListPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockSearchParams();
+    installMockRouterUrlSync();
+    mockPathname.current = "/admin/institutions";
     list.mockResolvedValue({ ok: true, data: [norte, sur], pagination: { page: 1, pageSize: 20, total: 2 } });
   });
 
@@ -51,6 +54,19 @@ describe("InstitutionsListPage", () => {
     await userEvent.selectOptions(screen.getByLabelText("Estado"), "archived");
 
     expect(list).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, status: "archived" }));
+    expect(mockRouter.replace).toHaveBeenCalledWith("/admin/institutions?status=archived", { scroll: false });
+  });
+
+  it("loads list state from the URL on first render", async () => {
+    setMockSearchParams("status=archived&search=norte");
+    list.mockResolvedValue({ ok: true, data: [sur], pagination: { page: 1, pageSize: 20, total: 1 } });
+
+    render(<InstitutionsListPage />);
+
+    await waitFor(() =>
+      expect(list).toHaveBeenCalledWith(expect.objectContaining({ status: "archived", search: "norte", page: 1 })),
+    );
+    expect(screen.getByLabelText("Buscar por nombre o slug")).toHaveValue("norte");
   });
 
   it("applies the search only when it is submitted", async () => {

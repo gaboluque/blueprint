@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminInstitutions } from "@/frontend/gateway/institutions";
-import type { ListInstitutionsQuery } from "@/domains/institutions/validations/institution.validation";
+import {
+  listInstitutionsQuerySchema,
+  type ListInstitutionsQuery,
+} from "@/domains/institutions/validations/institution.validation";
 import type { InstitutionListItemDto } from "@/domains/institutions/views/institution.view";
 import { AdminRoutes } from "@/frontend/components/admin/adminRoutes";
 import { INSTITUTION_STATUS_LABELS, InstitutionStatusBadge } from "@/frontend/components/admin/statusLabels";
@@ -47,7 +50,11 @@ const COLUMNS: DataTableColumn<InstitutionListItemDto>[] = [
 export function InstitutionsListPage() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
-  const list = useListQuery({ initialQuery: INITIAL_QUERY, fetch: AdminInstitutions.list });
+  const list = useListQuery({
+    initialQuery: INITIAL_QUERY,
+    fetch: AdminInstitutions.list,
+    querySchema: listInstitutionsQuerySchema,
+  });
 
   return (
     <>

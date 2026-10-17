@@ -66,7 +66,12 @@ export function ListFilters<Q>({ fields, query, onChange }: ListFiltersProps<Q>)
     <div className="mb-4 flex flex-wrap items-end gap-4">
       {fields.map((field) =>
         field.type === "search" ? (
-          <SearchFilter key={field.name} field={field} query={query} onChange={onChange} />
+          <SearchFilter
+            key={`${field.name}:${valueOf(query, field.name)}`}
+            field={field}
+            query={query}
+            onChange={onChange}
+          />
         ) : (
           <SelectFilter key={field.name} field={field} query={query} onChange={onChange} />
         ),

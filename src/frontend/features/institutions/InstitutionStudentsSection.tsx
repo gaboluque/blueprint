@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { AdminInstitutions } from "@/frontend/gateway/institutions";
-import type { CreateStudentBody, ListStudentsQuery } from "@/domains/students/validations/student.validation";
+import {
+  listStudentsQuerySchema,
+  type CreateStudentBody,
+  type ListStudentsQuery,
+} from "@/domains/students/validations/student.validation";
 import type { StudentDto } from "@/domains/students/views/student.view";
 import { AdminRoutes } from "@/frontend/components/admin/adminRoutes";
 import { STUDENT_STATUS_LABELS, StudentStatusBadge } from "@/frontend/components/admin/statusLabels";
@@ -55,7 +59,11 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
     (body: CreateStudentBody) => AdminInstitutions.createStudent(institutionId, body),
     [institutionId],
   );
-  const list = useListQuery({ initialQuery: INITIAL_QUERY, fetch });
+  const list = useListQuery({
+    initialQuery: INITIAL_QUERY,
+    fetch,
+    querySchema: listStudentsQuerySchema,
+  });
 
   return (
     <Card
