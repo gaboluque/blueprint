@@ -14,7 +14,10 @@ db-down:
 	docker compose down
 
 db-generate:
-	npm run db:generate
+ifndef NAME
+	$(error Set NAME to a snake_case description, e.g. make db-generate NAME=add_audit_events)
+endif
+	npm run db:generate -- $(NAME)
 
 db-migrate:
 	npm run db:migrate

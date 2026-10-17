@@ -1,3 +1,10 @@
+DO $$ BEGIN
+ IF to_regclass('public.users') IS NULL AND to_regclass('public.admins') IS NOT NULL THEN
+  CREATE TYPE "public"."user_role" AS ENUM('admin');
+  ALTER TABLE "admins" RENAME TO "users";
+  ALTER TABLE "users" ADD COLUMN "role" "user_role" DEFAULT 'admin' NOT NULL;
+ END IF;
+END $$;--> statement-breakpoint
 CREATE TABLE "audit_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"occurred_at" timestamp with time zone DEFAULT now() NOT NULL,

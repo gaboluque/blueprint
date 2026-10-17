@@ -43,7 +43,7 @@ curl -b cookies.txt http://localhost:3001/api/admin/me
 | `make setup` | Creates `.env` if missing and runs `npm install` |
 | `make start` | Starts Postgres, migrates, and runs `next dev` |
 | `make db-up` / `make db-down` | Starts or stops the Postgres container |
-| `make db-generate` | Generates a migration from `src/lib/db/schema.ts` |
+| `make db-generate NAME=…` | Generates a migration from `src/lib/db/schema.ts` (name required, snake_case, e.g. `add_audit_events`) |
 | `make db-migrate` | Applies pending migrations |
 | `make seed` | Inserts fake data (skips rows that already exist) |
 | `make lint` · `make typecheck` · `make test` | Quality gates |
@@ -81,7 +81,7 @@ scripts/seed.ts   fake seed data
 tests/unit/       Jest unit tests mirroring src/
 ```
 
-- **Database.** Plain Postgres, no Supabase and no RLS. `src/lib/db/schema.ts` is the only schema definition; drizzle-kit generates migrations from it. One `pg` pool is cached on `globalThis` so dev hot reload doesn't leak connections.
+- **Database.** Plain Postgres, no Supabase and no RLS. `src/lib/db/schema.ts` is the only schema definition; drizzle-kit generates migrations from it. Always pass a declarative name: `make db-generate NAME=add_audit_events` (or `npm run db:generate -- add_audit_events`). Without a name, generation fails on purpose so files are not named with drizzle-kit’s random adjective\_hero slugs. One `pg` pool is cached on `globalThis` so dev hot reload doesn't leak connections.
 - **Repos and models.** Each table has a repo extending `BaseRepo`, which maps rows to rich model classes (`student.isEligible(institution)`, `institution.archive(now)`). Models never hold a db handle; relations are explicit methods that take repos, such as `institution.students(repos, { page, pageSize }, filters)`.
 - **Requests.** `AdminApiHandler` authenticates the session cookie, validates params/query/body with Zod, runs the handler, and maps domain errors to the `{ ok, data | error }` envelope.
 - **Authorization.** `.policy.ts` modules decide who may act, called from services. They fail closed.
