@@ -6,6 +6,7 @@ import type { DbExecutor } from "@/lib/db/client";
 import { RepoRegistry } from "@/lib/db/repoRegistry";
 import { AdminApiHandlerFactory } from "@/lib/http/adminApiHandler";
 import { HandlerResults } from "@/lib/http/handlerResults";
+import { ErrorReporter } from "@/lib/observability/errorReporter";
 import type { Logger } from "@/lib/observability/logger";
 import { paginationQuerySchema } from "@/lib/pagination";
 import { idParamsSchema } from "@/lib/validation/schemas";
@@ -148,7 +149,11 @@ describe("AdminApiHandler", () => {
     const route = AdminApiHandler(async () => ({}), { ...OPTIONS, bodySchema });
 
     const response = await route(
-      makeRequest("/api/admin/things", { method: "POST", body: { name: "Ok", status: "archived" }, token: VALID_TOKEN }),
+      makeRequest("/api/admin/things", {
+        method: "POST",
+        body: { name: "Ok", status: "archived" },
+        token: VALID_TOKEN,
+      }),
     );
     const json = await response.json();
 
@@ -206,6 +211,21 @@ describe("AdminApiHandler", () => {
       }),
       "request_failed",
     );
+  });
+
+  it("reports unexpected errors to the configured ErrorReporter", async () => {
+    const report = jest.fn();
+    ErrorReporter.set({ report });
+    const { AdminApiHandler } = setup();
+    const failure = new Error("relation does not exist");
+    const route = AdminApiHandler(async () => {
+      throw failure;
+    }, OPTIONS);
+
+    await route(makeRequest("/api/admin/things", { token: VALID_TOKEN }));
+
+    expect(report).toHaveBeenCalledWith(failure, expect.objectContaining({ route: OPTIONS.route }));
+    ErrorReporter.set({ report: () => {} });
   });
 
   it("logs one info line per successful request with status, duration, and actorId", async () => {

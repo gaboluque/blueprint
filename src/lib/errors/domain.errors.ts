@@ -1,12 +1,6 @@
 export type FieldErrors = Record<string, string>;
 
-export type DomainErrorKind =
-  | "input"
-  | "unauthorized"
-  | "forbidden"
-  | "not_found"
-  | "conflict"
-  | "unprocessable";
+export type DomainErrorKind = "input" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "unprocessable";
 
 /** Expected failure raised by services, models, policies, and repos. Messages are user-safe Spanish. */
 export abstract class DomainError extends Error {

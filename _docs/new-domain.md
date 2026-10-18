@@ -11,7 +11,7 @@ Use `src/domains/institutions/` as the template. One user-facing capability usua
 ## 2. Domain folder (`src/domains/<domain>/`)
 
 | File                                 | Role                                                                                                                |
-|--------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `<entity>.model.ts`                  | Class with field behavior; inject `now` for time; no db handle                                                      |
 | `<entities>.repo.ts`                 | Extends `BaseRepo`; `toModel(row)`; named queries only when `where` is not enough; set `conflictMessage` in Spanish |
 | `<entity>.policy.ts`                 | `canX(actor, entity)` → `boolean` only                                                                              |

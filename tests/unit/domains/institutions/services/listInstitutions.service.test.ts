@@ -25,7 +25,10 @@ describe("ListInstitutions", () => {
       status: "active",
     });
 
-    expect(listWithStudentCounts).toHaveBeenCalledWith({ search: "ficticia", status: "active" }, { page: 2, pageSize: 10 });
+    expect(listWithStudentCounts).toHaveBeenCalledWith(
+      { search: "ficticia", status: "active" },
+      { page: 2, pageSize: 10 },
+    );
     expect(result).toBe(page);
   });
 

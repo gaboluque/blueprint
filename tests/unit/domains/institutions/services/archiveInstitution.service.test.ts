@@ -3,7 +3,7 @@ import { InstitutionPolicy } from "@/domains/institutions/institution.policy";
 import { ArchiveInstitution } from "@/domains/institutions/services/archiveInstitution.service";
 import type { AppRepos } from "@/lib/db/repoRegistry";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors/domain.errors";
-import { buildAdminActor, buildArchivedInstitution, buildInstitution, INSTITUTION_ID } from "../../../../factories/models";
+import { buildAdminActor, buildArchivedInstitution, buildInstitution, INSTITUTION_ID } from "@tests/factories/models";
 
 const NOW = new Date("2026-03-01T12:00:00.000Z");
 

@@ -20,4 +20,4 @@ Full guide: `AGENTS.md`. API wire contract: `_docs/api-contracts.md`. New featur
 
 ## Done means
 
-`make lint` · `make typecheck` · `make test` green. Schema changes: edit `schema.ts` → `make db-generate NAME=snake_case` → review migration → `make db-migrate`.
+`make format` · `make lint` · `make typecheck` · `make test` green. Schema changes: edit `schema.ts` → `make db-generate NAME=snake_case` → review migration → `make db-migrate`.

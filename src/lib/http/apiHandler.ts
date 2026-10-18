@@ -3,6 +3,7 @@ import type { AuditContext } from "@/domains/audit/auditEvents.repo";
 import { Database } from "@/lib/db/client";
 import { RepoRegistry, type AppRepos } from "@/lib/db/repoRegistry";
 import { ErrorMapping } from "@/lib/errors/errorMapping";
+import { ErrorReporter } from "@/lib/observability/errorReporter";
 import { AppLogger, type Logger } from "@/lib/observability/logger";
 import { RequestId } from "@/lib/observability/requestId";
 import { Validation } from "@/lib/validation/validation";
@@ -89,11 +90,7 @@ function withRequestId(response: Response, requestId: string): Response {
  * Every response carries `x-request-id` and produces one structured log line.
  */
 function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDeps = defaultDeps) {
-  return function apiHandler<
-    P extends Schema = undefined,
-    Q extends Schema = undefined,
-    B extends Schema = undefined,
-  >(
+  return function apiHandler<P extends Schema = undefined, Q extends Schema = undefined, B extends Schema = undefined>(
     handler: (ctx: ApiHandlerContext<TActor, P, Q, B>) => Promise<unknown>,
     options: ApiHandlerOptions<P, Q, B>,
   ) {
@@ -108,9 +105,7 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
         actor = await authenticate(request, registry.repos);
         const auditActor = actorForAudit(actor);
         if (auditActor) registry.setAuditContext({ actor: auditActor, requestId });
-        const params = options.paramsSchema
-          ? Validation.parse(options.paramsSchema, await context?.params)
-          : undefined;
+        const params = options.paramsSchema ? Validation.parse(options.paramsSchema, await context?.params) : undefined;
         const query = options.querySchema ? Validation.parse(options.querySchema, queryRecord(request)) : undefined;
         const body = options.bodySchema
           ? Validation.parse(options.bodySchema, await RequestBody.readJson(request))
@@ -136,10 +131,7 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
         return response;
       } catch (error) {
         const mapped = ErrorMapping.map(error, options.fallbackError);
-        const response = withRequestId(
-          ApiResponse.error(mapped.message, mapped.status, mapped.fieldErrors),
-          requestId,
-        );
+        const response = withRequestId(ApiResponse.error(mapped.message, mapped.status, mapped.fieldErrors), requestId);
         const payload = {
           status: mapped.status,
           durationMs: Math.round(performance.now() - startedAt),
@@ -149,6 +141,7 @@ function create<TActor>(authenticate: Authenticator<TActor>, deps: ApiHandlerDep
         if (mapped.expected) {
           log.warn(payload, "request_failed");
         } else {
+          ErrorReporter.report(error, { route: options.route, requestId, actorId: actorIdOf(actor) });
           log.error(
             { ...payload, err: error instanceof Error ? { ...payload.err, stack: error.stack } : payload.err },
             "request_failed",

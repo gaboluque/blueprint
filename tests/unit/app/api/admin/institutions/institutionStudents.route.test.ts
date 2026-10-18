@@ -8,12 +8,8 @@ import { Database } from "@/lib/db/client";
 import { buildAdminActor, buildStudent, INSTITUTION_ID } from "../../../../../factories/models";
 import { AdminRouteKit } from "../adminRouteKit";
 
-jest.mock("@/lib/auth/auth", () =>
-  jest.requireActual("../adminRouteKit").AdminRouteKit.authModule(),
-);
-jest.mock("@/lib/db/client", () =>
-  jest.requireActual("../adminRouteKit").AdminRouteKit.dbClientModule(),
-);
+jest.mock("@/lib/auth/auth", () => jest.requireActual("../adminRouteKit").AdminRouteKit.authModule());
+jest.mock("@/lib/db/client", () => jest.requireActual("../adminRouteKit").AdminRouteKit.dbClientModule());
 jest.mock("@/domains/students/services/listInstitutionStudents.service", () => ({
   ListInstitutionStudents: { call: jest.fn() },
 }));
@@ -35,7 +31,10 @@ describe("GET /api/admin/institutions/[id]/students", () => {
     const student = buildStudent();
     jest.mocked(ListInstitutionStudents.call).mockResolvedValue({ items: [student], page: 2, pageSize: 5, total: 6 });
 
-    const response = await GET(AdminRouteKit.request(`${PATH}?page=2&pageSize=5&search=%20ana%20&status=active`), params);
+    const response = await GET(
+      AdminRouteKit.request(`${PATH}?page=2&pageSize=5&search=%20ana%20&status=active`),
+      params,
+    );
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({

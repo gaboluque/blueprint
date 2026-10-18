@@ -22,7 +22,13 @@ type InstitutionFormProps = {
 
 const EMPTY_VALUES: InstitutionFormValues = { name: "", slug: "", contactEmail: "" };
 
-export function InstitutionForm({ initialValues = EMPTY_VALUES, submitLabel, submit, onSuccess, onCancel }: InstitutionFormProps) {
+export function InstitutionForm({
+  initialValues = EMPTY_VALUES,
+  submitLabel,
+  submit,
+  onSuccess,
+  onCancel,
+}: InstitutionFormProps) {
   const { values, setField } = useFormValues(initialValues);
   const mutation = useMutation(submit);
   const { fieldErrors } = mutation;

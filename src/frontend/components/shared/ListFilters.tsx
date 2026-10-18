@@ -24,7 +24,11 @@ function patchOf<Q>(name: keyof Q, value: string): Partial<Q> {
   return { [name]: value.trim() || undefined } as Partial<Q>;
 }
 
-function SearchFilter<Q>({ field, query, onChange }: { field: SearchFilterField<Q> } & Omit<ListFiltersProps<Q>, "fields">) {
+function SearchFilter<Q>({
+  field,
+  query,
+  onChange,
+}: { field: SearchFilterField<Q> } & Omit<ListFiltersProps<Q>, "fields">) {
   const [draft, setDraft] = useState(() => valueOf(query, field.name));
 
   const submit = (event: FormEvent) => {
@@ -49,7 +53,11 @@ function SearchFilter<Q>({ field, query, onChange }: { field: SearchFilterField<
   );
 }
 
-function SelectFilter<Q>({ field, query, onChange }: { field: SelectFilterField<Q> } & Omit<ListFiltersProps<Q>, "fields">) {
+function SelectFilter<Q>({
+  field,
+  query,
+  onChange,
+}: { field: SelectFilterField<Q> } & Omit<ListFiltersProps<Q>, "fields">) {
   return (
     <SelectField
       label={field.label}

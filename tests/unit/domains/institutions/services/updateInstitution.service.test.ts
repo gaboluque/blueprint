@@ -3,7 +3,12 @@ import { InstitutionPolicy } from "@/domains/institutions/institution.policy";
 import { UpdateInstitution } from "@/domains/institutions/services/updateInstitution.service";
 import type { AppRepos } from "@/lib/db/repoRegistry";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors/domain.errors";
-import { buildAdminActor, buildArchivedInstitution, buildInstitution, INSTITUTION_ID } from "../../../../factories/models";
+import {
+  buildAdminActor,
+  buildArchivedInstitution,
+  buildInstitution,
+  INSTITUTION_ID,
+} from "../../../../factories/models";
 
 const PATCH = { name: "Universidad Renombrada" };
 

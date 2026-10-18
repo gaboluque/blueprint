@@ -4,15 +4,26 @@ import { Auth } from "@/lib/auth/auth";
 import { signInBodySchema } from "@/lib/auth/auth.validation";
 import { SessionCookie } from "@/lib/auth/sessionCookie";
 import { UnauthorizedError } from "@/lib/errors/domain.errors";
+import { HttpError } from "@/lib/errors/http.errors";
 import { PublicApiHandler } from "@/lib/http/adminApiHandler";
 import { ApiResponse } from "@/lib/http/apiResponse";
+import { RateLimiter } from "@/lib/http/rateLimiter";
 
 export const runtime = "nodejs";
 
 const INVALID_CREDENTIALS_MESSAGE = "Correo o contraseña incorrectos.";
+const TOO_MANY_ATTEMPTS_MESSAGE = "Demasiados intentos. Intenta de nuevo en un minuto.";
+const SIGN_IN_RATE_LIMIT = { limit: 5, windowMs: 60_000 };
+
+function clientIp(request: Request): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+}
 
 export const POST = PublicApiHandler(
-  async ({ body, repos, requestId, setAuditContext }) => {
+  async ({ request, body, repos, requestId, setAuditContext }) => {
+    const rateLimitKey = `sign-in:${clientIp(request)}:${body.email}`;
+    if (!RateLimiter.consume(rateLimitKey, SIGN_IN_RATE_LIMIT)) throw new HttpError(TOO_MANY_ATTEMPTS_MESSAGE, 429);
+
     const session = await Auth.provider().signIn(repos, body);
     if (!session || session.actor.role !== "admin") throw new UnauthorizedError(INVALID_CREDENTIALS_MESSAGE);
 

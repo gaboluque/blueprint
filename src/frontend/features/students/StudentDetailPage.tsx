@@ -59,7 +59,15 @@ export function StudentDetailPage({ studentId }: { studentId: string }) {
 
   if (resource.error) {
     return (
-      <Alert action={<Button variant="secondary" onClick={resource.reload}>Reintentar</Button>}>{resource.error}</Alert>
+      <Alert
+        action={
+          <Button variant="secondary" onClick={resource.reload}>
+            Reintentar
+          </Button>
+        }
+      >
+        {resource.error}
+      </Alert>
     );
   }
   if (!resource.data) return <LoadingState />;
@@ -80,7 +88,9 @@ export function StudentDetailPage({ studentId }: { studentId: string }) {
         </div>
       </div>
 
-      {readOnly && <Alert tone="info">La institución de este estudiante está archivada. Solo puedes consultar sus datos.</Alert>}
+      {readOnly && (
+        <Alert tone="info">La institución de este estudiante está archivada. Solo puedes consultar sus datos.</Alert>
+      )}
 
       <Card
         title="Información"

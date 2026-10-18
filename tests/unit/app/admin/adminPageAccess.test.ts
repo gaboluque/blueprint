@@ -21,7 +21,11 @@ describe("AdminPageAccess.decide", () => {
   });
 
   it("sends signed-in admins away from login", () => {
-    const decision = AdminPageAccess.decide({ pathname: "/admin/login", hasSessionCookie: true, actor: buildAdminActor() });
+    const decision = AdminPageAccess.decide({
+      pathname: "/admin/login",
+      hasSessionCookie: true,
+      actor: buildAdminActor(),
+    });
 
     expect(decision).toEqual({ redirectTo: "/admin", clearSessionCookie: false });
   });

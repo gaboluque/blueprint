@@ -9,12 +9,8 @@ import { Database } from "@/lib/db/client";
 import { buildAdminActor, buildStudent, STUDENT_ID } from "../../../../../factories/models";
 import { AdminRouteKit } from "../adminRouteKit";
 
-jest.mock("@/lib/auth/auth", () =>
-  jest.requireActual("../adminRouteKit").AdminRouteKit.authModule(),
-);
-jest.mock("@/lib/db/client", () =>
-  jest.requireActual("../adminRouteKit").AdminRouteKit.dbClientModule(),
-);
+jest.mock("@/lib/auth/auth", () => jest.requireActual("../adminRouteKit").AdminRouteKit.authModule());
+jest.mock("@/lib/db/client", () => jest.requireActual("../adminRouteKit").AdminRouteKit.dbClientModule());
 jest.mock("@/domains/students/services/getStudent.service", () => ({ GetStudent: { call: jest.fn() } }));
 jest.mock("@/domains/students/services/updateStudent.service", () => ({ UpdateStudent: { call: jest.fn() } }));
 jest.mock("@/domains/students/services/deactivateStudent.service", () => ({

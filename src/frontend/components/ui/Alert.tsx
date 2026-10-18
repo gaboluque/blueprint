@@ -9,7 +9,15 @@ const TONE_CLASSES: Record<AlertTone, string> = {
 };
 
 /** Errors use `role="alert"` so screen readers announce them; info is a polite status. */
-export function Alert({ tone = "error", children, action }: { tone?: AlertTone; children: ReactNode; action?: ReactNode }) {
+export function Alert({
+  tone = "error",
+  children,
+  action,
+}: {
+  tone?: AlertTone;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <div
       role={tone === "error" ? "alert" : "status"}

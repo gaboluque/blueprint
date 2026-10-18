@@ -130,7 +130,10 @@ describe("DevAuthAdapter", () => {
 
     it("rejects a token signed with another secret", async () => {
       const { user, token } = await signedIn();
-      const otherProvider = DevAuthAdapter.create({ secret: "another-secret-that-is-also-long-enough", now: () => NOW });
+      const otherProvider = DevAuthAdapter.create({
+        secret: "another-secret-that-is-also-long-enough",
+        now: () => NOW,
+      });
 
       const actor = await otherProvider.authenticate(lookupWith(user), token);
 

@@ -1,4 +1,4 @@
-.PHONY: setup start db-up db-down db-generate db-migrate seed lint typecheck test check build
+.PHONY: setup start db-up db-down db-reset db-generate db-migrate seed format format-check lint typecheck test check build
 
 setup:
 	@test -f .env || cp .env.example .env
@@ -13,6 +13,11 @@ db-up:
 db-down:
 	docker compose down
 
+# Wipes local Postgres data and rebuilds it from migrations + seed.
+db-reset:
+	docker compose down -v
+	$(MAKE) db-up db-migrate seed
+
 db-generate:
 ifndef NAME
 	$(error Set NAME to a snake_case description, e.g. make db-generate NAME=add_audit_events)
@@ -24,6 +29,12 @@ db-migrate:
 
 seed:
 	npm run db:seed
+
+format:
+	npm run format
+
+format-check:
+	npm run format:check
 
 lint:
 	npm run lint
@@ -38,4 +49,4 @@ build:
 	npm run build
 
 # Same gates as GitHub Actions (migrate separately when you need a real DB).
-check: lint typecheck test build
+check: format-check lint typecheck test build

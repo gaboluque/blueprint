@@ -14,7 +14,10 @@ export class AuditEventsRepo extends BaseRepo<typeof auditEvents, AuditEvent> {
   /** Prevents the base-repo decorator from auditing audit writes. */
   protected override readonly auditable = false;
 
-  constructor(context: RepoContext, private readonly getContext: () => AuditContext | null) {
+  constructor(
+    context: RepoContext,
+    private readonly getContext: () => AuditContext | null,
+  ) {
     super(context);
   }
 

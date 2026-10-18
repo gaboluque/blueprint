@@ -13,7 +13,15 @@ type ListShellProps = {
   children: ReactNode;
 };
 
-export function ListShell({ isLoading, hasLoadedOnce, error, onRetry, isEmpty, emptyMessage, children }: ListShellProps) {
+export function ListShell({
+  isLoading,
+  hasLoadedOnce,
+  error,
+  onRetry,
+  isEmpty,
+  emptyMessage,
+  children,
+}: ListShellProps) {
   return (
     <div aria-busy={isLoading}>
       {error && (

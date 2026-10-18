@@ -45,10 +45,7 @@ describe("GET /api/admin/students/[id]", () => {
       });
       const context = IntegrationRoute.routeContext({ id: student.id });
 
-      const response = await GET(
-        IntegrationRoute.request(`/api/admin/students/${student.id}`, { cookie }),
-        context,
-      );
+      const response = await GET(IntegrationRoute.request(`/api/admin/students/${student.id}`, { cookie }), context);
       const json = await response.json();
 
       expect(response.status).toBe(200);
@@ -69,10 +66,7 @@ describe("GET /api/admin/students/[id]", () => {
       const missingId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
       const context = IntegrationRoute.routeContext({ id: missingId });
 
-      const response = await GET(
-        IntegrationRoute.request(`/api/admin/students/${missingId}`, { cookie }),
-        context,
-      );
+      const response = await GET(IntegrationRoute.request(`/api/admin/students/${missingId}`, { cookie }), context);
 
       expect(response.status).toBe(404);
     });

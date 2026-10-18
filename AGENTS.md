@@ -23,14 +23,14 @@ page.tsx → src/frontend/features/<domain>/<Component> → src/frontend/gateway
   → <table>.repo.ts (BaseRepo + named queries) → Drizzle → Postgres
 ```
 
-| Layer | Owns | Never |
-|---|---|---|
-| Route (`src/app/(server)/api`) | Handler options, calling one service, choosing `HandlerResults` | Queries, business `if`s, policies |
-| Service | One user intent. Policy checks, model rules, orchestration, transactions | HTTP, Zod, `Response`, status codes |
-| Policy (`*.policy.ts`) | Who may act on which entity (`boolean`) | State rules, I/O |
-| Model (`*.model.ts`) | Behavior on own fields; cross-entity rules take an already-loaded entity; relations take `repos` explicitly | Holding a db handle, reading the clock, lazy loading |
-| Repo (`*.repo.ts`) | Queries for one table, row → model, unique violation → `ConflictError` | Business decisions, returning raw rows |
-| View (`views/*.view.ts`) | Model → wire DTO (the API contract) | Business rules |
+| Layer                          | Owns                                                                                                        | Never                                                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Route (`src/app/(server)/api`) | Handler options, calling one service, choosing `HandlerResults`                                             | Queries, business `if`s, policies                    |
+| Service                        | One user intent. Policy checks, model rules, orchestration, transactions                                    | HTTP, Zod, `Response`, status codes                  |
+| Policy (`*.policy.ts`)         | Who may act on which entity (`boolean`)                                                                     | State rules, I/O                                     |
+| Model (`*.model.ts`)           | Behavior on own fields; cross-entity rules take an already-loaded entity; relations take `repos` explicitly | Holding a db handle, reading the clock, lazy loading |
+| Repo (`*.repo.ts`)             | Queries for one table, row → model, unique violation → `ConflictError`                                      | Business decisions, returning raw rows               |
+| View (`views/*.view.ts`)       | Model → wire DTO (the API contract)                                                                         | Business rules                                       |
 
 ## Layout
 
@@ -80,6 +80,9 @@ A new feature touches four folders: `frontend/gateway/<domain>.ts` (one method p
 - **Responses:** return a plain value (`200`), `HandlerResults.created(dto)` (`201`), `HandlerResults.page(result, View.format)` (paginated), `HandlerResults.noContent()` (`204`), or a `NextResponse` when you need cookies.
 - **DB routes** export `export const runtime = "nodejs"`.
 - **Time:** inject `now` into models (`institution.archive(new Date())` in the service).
+- **Unexpected (500) errors** go through `ErrorReporter` (`src/lib/observability/errorReporter.ts`) before being logged — a no-op by default. Wire a real adapter (Sentry, …) in `src/instrumentation.ts` via `ErrorReporter.set(...)`; no call site changes.
+- **Rate limiting:** `RateLimiter` (`src/lib/http/rateLimiter.ts`) is an in-memory fixed window — fine for one instance, not for horizontal scaling. Swap for a shared store (Postgres, Redis) before running more than one. `POST /api/admin/sessions` is the only consumer today.
+- **Async / background work:** none yet. When a feature needs it (email, slow jobs), call the work inline from the service first; only add a queue (pg-boss, BullMQ + Redis, QStash, …) once more than one feature needs deferred work — don't build the abstraction speculatively.
 - **Schema changes:** edit `src/lib/db/schema.ts` → `make db-generate NAME=<snake_case>` (required; never accept drizzle-kit’s random Marvel names) → review the SQL in `db/migrations` → `make db-migrate`. Names describe the change (`add_audit_events`, not `0001_demonic_matthew_murdock`). Same via `npm run db:generate -- add_audit_events`.
 - **Copy:** Spanish (es-CO) for all user-facing text. Code, comments, and logs in English. Comments only for a non-obvious why.
 
@@ -129,7 +132,7 @@ Every test uses **Arrange–Act–Assert** with a **blank line** between each bl
 
 ## Quality gates
 
-`make lint` · `make typecheck` · `make test` must be green before you call work done.
+`make format` · `make lint` · `make typecheck` · `make test` must be green before you call work done. A pre-commit hook (`husky` + `lint-staged`) runs format and lint on staged files automatically.
 
 **ESLint architecture.** `eslint.boundaries.mjs` defines layers (`frontend`, `app-ui`, `app-api`, `domains`, `lib`) and file categories (repos, services, views, …). `boundaries/dependencies` enforces import direction; complexity rules (`complexity`, `sonarjs/cognitive-complexity`, `max-depth`) apply under `src/**` only.
 

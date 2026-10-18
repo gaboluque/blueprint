@@ -72,7 +72,7 @@ Reference: `tests/unit/domains/institutions/institution.model.test.ts`, `tests/u
 ## Layout
 
 | Kind        | Path                                         | Mirrors              |
-|-------------|----------------------------------------------|----------------------|
+| ----------- | -------------------------------------------- | -------------------- |
 | Unit        | `tests/unit/**/*.test.ts`                    | `src/` tree          |
 | Integration | `tests/integration/**/*.integration.test.ts` | API `route.ts` files |
 
@@ -85,7 +85,7 @@ Add cases to an existing `describe` for the subject when one is already there. D
 One integration file per route module:
 
 | Route                                                   | Test file                                                                 |
-|---------------------------------------------------------|---------------------------------------------------------------------------|
+| ------------------------------------------------------- | ------------------------------------------------------------------------- |
 | `src/app/(server)/api/admin/institutions/route.ts`      | `tests/integration/api/admin/institutions.route.integration.test.ts`      |
 | `src/app/(server)/api/admin/institutions/[id]/route.ts` | `tests/integration/api/admin/institutions/[id]/route.integration.test.ts` |
 
@@ -139,7 +139,7 @@ Reference: `tests/unit/app/api/admin/institutions/route.test.ts`, `tests/unit/li
 ### Setup
 
 | Step           | What                                                                                                                               |
-|----------------|------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | Isolation      | `await IntegrationDb.reset()` in `beforeEach`                                                                                      |
 | 401 cases      | Reset only; call handler without `cookie`                                                                                          |
 | Authenticated  | Nested `describe("when authenticated")`: reset → `UserFactory.createAdmin()` → `IntegrationRoute.signInAsAdmin()` → reuse `cookie` |
@@ -173,7 +173,7 @@ Related file: `tests/integration/helpers/integrationRoute.ts`, `tests/integratio
 ## Factories and fake data
 
 | Use                                    | Location                                                                                 |
-|----------------------------------------|------------------------------------------------------------------------------------------|
+| -------------------------------------- | ---------------------------------------------------------------------------------------- |
 | In-memory models, actors, stable UUIDs | `tests/factories/models.ts` — `buildInstitution`, `buildAdminActor`, `INSTITUTION_ID`, … |
 | Rows persisted for integration         | `tests/integration/factories/*.factory.ts`                                               |
 

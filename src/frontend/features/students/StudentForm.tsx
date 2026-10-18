@@ -33,7 +33,13 @@ const EMPTY_VALUES: StudentFormValues = {
 
 const STATUS_OPTIONS = recordToOptions(STUDENT_STATUS_LABELS);
 
-export function StudentForm({ initialValues = EMPTY_VALUES, submitLabel, submit, onSuccess, onCancel }: StudentFormProps) {
+export function StudentForm({
+  initialValues = EMPTY_VALUES,
+  submitLabel,
+  submit,
+  onSuccess,
+  onCancel,
+}: StudentFormProps) {
   const { values, setField } = useFormValues(initialValues);
   const mutation = useMutation(submit);
   const { fieldErrors } = mutation;

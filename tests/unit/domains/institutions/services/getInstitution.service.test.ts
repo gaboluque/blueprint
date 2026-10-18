@@ -3,7 +3,7 @@ import { InstitutionPolicy } from "@/domains/institutions/institution.policy";
 import { GetInstitution } from "@/domains/institutions/services/getInstitution.service";
 import type { AppRepos } from "@/lib/db/repoRegistry";
 import { ForbiddenError, NotFoundError } from "@/lib/errors/domain.errors";
-import { buildAdminActor, buildArchivedInstitution, buildInstitution, INSTITUTION_ID } from "../../../../factories/models";
+import { buildAdminActor, buildArchivedInstitution, buildInstitution, INSTITUTION_ID } from "@tests/factories/models";
 
 function setup() {
   const findById = jest.fn();

@@ -44,7 +44,15 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
 
   if (resource.error) {
     return (
-      <Alert action={<Button variant="secondary" onClick={resource.reload}>Reintentar</Button>}>{resource.error}</Alert>
+      <Alert
+        action={
+          <Button variant="secondary" onClick={resource.reload}>
+            Reintentar
+          </Button>
+        }
+      >
+        {resource.error}
+      </Alert>
     );
   }
   if (!institution) return <LoadingState />;

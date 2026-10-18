@@ -45,6 +45,22 @@ describe("POST /api/admin/sessions", () => {
     expect(response.status).toBe(401);
   });
 
+  it("returns 429 after too many sign-in attempts for the same email", async () => {
+    await UserFactory.createAdmin();
+    const attempt = () =>
+      POST(
+        IntegrationRoute.request("/api/admin/sessions", {
+          method: "POST",
+          body: { email: INTEGRATION_ADMIN.email, password: "wrong-password" },
+        }),
+      );
+
+    for (let i = 0; i < 5; i += 1) await attempt();
+    const response = await attempt();
+
+    expect(response.status).toBe(429);
+  });
+
   it("sets the session cookie and returns the admin user from the database", async () => {
     const admin = await UserFactory.createAdmin();
 
@@ -81,9 +97,7 @@ describe("DELETE /api/admin/sessions", () => {
     });
 
     it("clears the session cookie and returns 204", async () => {
-      const response = await DELETE(
-        IntegrationRoute.request("/api/admin/sessions", { method: "DELETE", cookie }),
-      );
+      const response = await DELETE(IntegrationRoute.request("/api/admin/sessions", { method: "DELETE", cookie }));
 
       expect(response.status).toBe(204);
       expect(response.headers.get("set-cookie")).toContain(`${SessionCookie.name}=`);

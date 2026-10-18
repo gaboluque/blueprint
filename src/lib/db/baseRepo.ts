@@ -45,10 +45,7 @@ export type WhereOperators<V> = {
 
 /** Keyed by model property (camelCase). Scalar = eq (`null` = is null), array = in, object = operators, `undefined` = skipped. */
 export type Where<T extends PgTable> = {
-  [K in RowKey<T>]?:
-    | Row<T>[K]
-    | readonly NonNullable<Row<T>[K]>[]
-    | WhereOperators<NonNullable<Row<T>[K]>>;
+  [K in RowKey<T>]?: Row<T>[K] | readonly NonNullable<Row<T>[K]>[] | WhereOperators<NonNullable<Row<T>[K]>>;
 };
 
 export type OrderBy<T extends PgTable> = Partial<Record<RowKey<T>, "asc" | "desc">>;
@@ -253,7 +250,11 @@ export abstract class BaseRepo<TTable extends TableWithId, TModel> {
     return rows.map((row) => this.toModel(row as Row<TTable>));
   }
 
-  private async recordAudit(verb: "created" | "updated", row: Row<TTable>, changes: Record<string, unknown>): Promise<void> {
+  private async recordAudit(
+    verb: "created" | "updated",
+    row: Row<TTable>,
+    changes: Record<string, unknown>,
+  ): Promise<void> {
     if (!this.auditable) return;
     const id = (row as { id: string }).id;
     await this.audit.record({

@@ -27,7 +27,13 @@ const INITIAL_QUERY: ListInstitutionsQuery = { page: 1, pageSize: DEFAULT_PAGE_S
 
 const FILTER_FIELDS: FilterField<ListInstitutionsQuery>[] = [
   { type: "search", name: "search", label: "Buscar por nombre o slug" },
-  { type: "select", name: "status", label: "Estado", allLabel: "Todas", options: recordToOptions(INSTITUTION_STATUS_LABELS) },
+  {
+    type: "select",
+    name: "status",
+    label: "Estado",
+    allLabel: "Todas",
+    options: recordToOptions(INSTITUTION_STATUS_LABELS),
+  },
 ];
 
 const COLUMNS: DataTableColumn<InstitutionListItemDto>[] = [

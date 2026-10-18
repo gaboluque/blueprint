@@ -6,7 +6,12 @@ import { AdminInstitutions } from "@/frontend/gateway/institutions";
 import { AdminSession } from "@/frontend/gateway/session";
 import { InstitutionsListPage } from "@/frontend/features/institutions/InstitutionsListPage";
 import { institutionListItemDto } from "../../../../factories/dtos";
-import { installMockRouterUrlSync, mockPathname, mockRouter, setMockSearchParams } from "../../../../helpers/nextNavigation";
+import {
+  installMockRouterUrlSync,
+  mockPathname,
+  mockRouter,
+  setMockSearchParams,
+} from "../../../../helpers/nextNavigation";
 
 jest.mock("next/navigation", () => require("../../../../helpers/nextNavigation").createNextNavigationMock());
 jest.mock("@/frontend/gateway/institutions", () => ({ AdminInstitutions: { list: jest.fn(), create: jest.fn() } }));

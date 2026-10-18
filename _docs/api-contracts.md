@@ -19,7 +19,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 - **Archived institutions are read-only.** Any write on the institution or its students returns `409`.
 
 | Status | When                                                     |
-|--------|----------------------------------------------------------|
+| ------ | -------------------------------------------------------- |
 | 200    | Read, update, archive                                    |
 | 201    | Created (`POST`)                                         |
 | 204    | Deleted, signed out (no body)                            |
@@ -34,7 +34,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 ## Sessions
 
 | Method | Path                  | Body                  | Success                      | Errors                                          |
-|--------|-----------------------|-----------------------|------------------------------|-------------------------------------------------|
+| ------ | --------------------- | --------------------- | ---------------------------- | ----------------------------------------------- |
 | POST   | `/api/admin/sessions` | `{ email, password }` | `201` `UserDto`, sets cookie | `400`, `401` "Correo o contraseña incorrectos." |
 | DELETE | `/api/admin/sessions` | —                     | `204`, clears cookie         | —                                               |
 | GET    | `/api/admin/me`       | —                     | `200` `UserDto`              | `401`                                           |
@@ -42,7 +42,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 ## Institutions
 
 | Method | Path                           | Query / body                                                                                                  | Success                                                                                | Errors                                     |
-|--------|--------------------------------|---------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|--------------------------------------------|
+| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------ |
 | GET    | `/api/admin/institutions`      | `listInstitutionsQuerySchema`: `page`, `pageSize`, `search` (name or slug), `status` (`active` \| `archived`) | `200` `InstitutionListItemDto[]` + `pagination`, newest first                          | `400`                                      |
 | POST   | `/api/admin/institutions`      | `createInstitutionBodySchema`: `{ name, slug, contactEmail }`                                                 | `201` `InstitutionDto` (`status: "active"`)                                            | `400`, `409` slug taken                    |
 | GET    | `/api/admin/institutions/[id]` | —                                                                                                             | `200` `InstitutionDto` (archived ones too)                                             | `400`, `404`                               |
@@ -54,7 +54,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 ## Students
 
 | Method | Path                                    | Query / body                                                                                                                     | Success                                                                    | Errors                                                              |
-|--------|-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|---------------------------------------------------------------------|
+| ------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | GET    | `/api/admin/institutions/[id]/students` | `listStudentsQuerySchema`: `page`, `pageSize`, `search` (first/last name, email, document id), `status` (`active` \| `inactive`) | `200` `StudentDto[]` + `pagination`, by last name then first name          | `400`, `404` institution                                            |
 | POST   | `/api/admin/institutions/[id]/students` | `createStudentBodySchema`: `{ firstName, lastName, email, documentId, status? }` (`status` defaults to `active`)                 | `201` `StudentDto`                                                         | `400`, `404` institution, `409` institution archived or email taken |
 | GET    | `/api/admin/students/[id]`              | —                                                                                                                                | `200` `StudentDto`                                                         | `400`, `404`                                                        |
@@ -66,7 +66,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 ## Building blocks for each endpoint
 
 | Endpoint           | Service (`src/domains/<domain>/services/`)              | Repo calls                                                                                     | Policy                        | Model rule                                             |
-|--------------------|---------------------------------------------------------|------------------------------------------------------------------------------------------------|-------------------------------|--------------------------------------------------------|
+| ------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------ |
 | GET institutions   | `listInstitutions.service.ts` → `ListInstitutions.call` | `institutions.listWithStudentCounts`                                                           | `canList`                     | —                                                      |
 | POST institutions  | `createInstitution.service.ts`                          | `institutions.create` (unique slug → `409`)                                                    | `canCreate`                   | —                                                      |
 | GET institution    | `getInstitution.service.ts`                             | `institutions.findById`                                                                        | `canRead`                     | —                                                      |
@@ -85,7 +85,7 @@ Errors come from `InstitutionErrors` / `StudentErrors` (`*.errors.ts`); don't in
 Browser code calls the API through `src/frontend/gateway/*` on top of `ApiClient`. Each method returns `ApiResult<T>` (`{ ok: true, data, pagination? }` or `{ ok: false, error, fieldErrors? }`). Types come from domain views and validations via `import type`.
 
 | Export              | Module                                 | Methods                                                                                                                                                       |
-|---------------------|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AdminSession`      | `src/frontend/gateway/session.ts`      | `signIn(body)` → `UserDto` · `signOut()` → `null` (`204`) · `me()` → `UserDto`                                                                                |
 | `AdminInstitutions` | `src/frontend/gateway/institutions.ts` | `list(query)` · `create(body)` · `get(id)` · `update(id, body)` · `archive(id)` · `listStudents(institutionId, query)` · `createStudent(institutionId, body)` |
 | `AdminStudents`     | `src/frontend/gateway/students.ts`     | `get(id)` · `update(id, body)` · `deactivate(id)` → `StudentDto` (same as `DELETE /api/admin/students/[id]`, `200`)                                           |

@@ -27,7 +27,12 @@ describe("AdminSession", () => {
 
     const result = await AdminSession.signIn({ email: admin.email, password: "mala" });
 
-    expect(result).toEqual({ ok: false, status: 401, error: "Correo o contraseña incorrectos.", fieldErrors: undefined });
+    expect(result).toEqual({
+      ok: false,
+      status: 401,
+      error: "Correo o contraseña incorrectos.",
+      fieldErrors: undefined,
+    });
   });
 
   it("resolves sign-out's 204 to null data", async () => {

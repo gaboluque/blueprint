@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import boundaries from "eslint-plugin-boundaries";
+import prettier from "eslint-config-prettier";
 import sonarjs from "eslint-plugin-sonarjs";
 import { boundariesDependenciesRule, boundariesSettings } from "./eslint.boundaries.mjs";
 
@@ -59,5 +60,7 @@ export default defineConfig([
       ],
     },
   },
+  // Last: disables stylistic rules Prettier owns, so the two never disagree.
+  prettier,
   globalIgnores([".next/**", "node_modules/**", "migrations/**", "next-env.d.ts"]),
 ]);

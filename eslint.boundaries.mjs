@@ -31,13 +31,7 @@ export const boundariesSettings = {
   ],
 };
 
-const domainInternals = [
-  "domain-repo",
-  "domain-service",
-  "domain-model",
-  "domain-policy",
-  "domain-errors",
-];
+const domainInternals = ["domain-repo", "domain-service", "domain-model", "domain-policy", "domain-errors"];
 
 const appLayers = ["app-api", "app-ui"];
 

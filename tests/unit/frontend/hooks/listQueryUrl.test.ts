@@ -1,12 +1,13 @@
 import { listInstitutionsQuerySchema } from "@/domains/institutions/validations/institution.validation";
-import {
-  areListQueriesEqual,
-  listQueryToSearchParams,
-  parseListQueryFromUrl,
-} from "@/frontend/hooks/listQueryUrl";
+import { areListQueriesEqual, listQueryToSearchParams, parseListQueryFromUrl } from "@/frontend/hooks/listQueryUrl";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 
-const DEFAULTS = { page: 1, pageSize: DEFAULT_PAGE_SIZE, search: undefined, status: undefined as "active" | "archived" | undefined };
+const DEFAULTS = {
+  page: 1,
+  pageSize: DEFAULT_PAGE_SIZE,
+  search: undefined,
+  status: undefined as "active" | "archived" | undefined,
+};
 
 describe("listQueryUrl", () => {
   it("parses filters and pagination from search params", () => {

@@ -10,7 +10,13 @@ import { installMockRouterUrlSync, mockPathname, setMockSearchParams } from "../
 jest.mock("next/navigation", () => require("../../../../helpers/nextNavigation").createNextNavigationMock());
 jest.mock("@/frontend/gateway/session", () => ({ AdminSession: { signOut: jest.fn() } }));
 jest.mock("@/frontend/gateway/institutions", () => ({
-  AdminInstitutions: { get: jest.fn(), update: jest.fn(), archive: jest.fn(), listStudents: jest.fn(), createStudent: jest.fn() },
+  AdminInstitutions: {
+    get: jest.fn(),
+    update: jest.fn(),
+    archive: jest.fn(),
+    listStudents: jest.fn(),
+    createStudent: jest.fn(),
+  },
 }));
 
 const institution = institutionDto({ name: "Norte" });

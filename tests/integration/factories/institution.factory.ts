@@ -10,8 +10,7 @@ type CreateInstitutionInput = Partial<
 
 function insertValues(overrides: CreateInstitutionInput): typeof institutions.$inferInsert {
   const seq = IntegrationSequence.next();
-  const sample =
-    overrides.status === "archived" ? buildArchivedInstitution(overrides) : buildInstitution(overrides);
+  const sample = overrides.status === "archived" ? buildArchivedInstitution(overrides) : buildInstitution(overrides);
 
   const status = overrides.status ?? sample.status;
   return {

@@ -63,10 +63,7 @@ describe("GET /api/admin/institutions/[id]", () => {
       const missingId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
       const context = IntegrationRoute.routeContext({ id: missingId });
 
-      const response = await GET(
-        IntegrationRoute.request(`/api/admin/institutions/${missingId}`, { cookie }),
-        context,
-      );
+      const response = await GET(IntegrationRoute.request(`/api/admin/institutions/${missingId}`, { cookie }), context);
 
       expect(response.status).toBe(404);
       expect(await response.json()).toMatchObject({ ok: false });

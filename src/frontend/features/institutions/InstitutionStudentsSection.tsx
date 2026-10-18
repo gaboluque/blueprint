@@ -26,7 +26,13 @@ const INITIAL_QUERY: ListStudentsQuery = { page: 1, pageSize: DEFAULT_PAGE_SIZE,
 
 const FILTER_FIELDS: FilterField<ListStudentsQuery>[] = [
   { type: "search", name: "search", label: "Buscar por nombre, correo o documento" },
-  { type: "select", name: "status", label: "Estado", allLabel: "Todos", options: recordToOptions(STUDENT_STATUS_LABELS) },
+  {
+    type: "select",
+    name: "status",
+    label: "Estado",
+    allLabel: "Todos",
+    options: recordToOptions(STUDENT_STATUS_LABELS),
+  },
 ];
 
 const COLUMNS: DataTableColumn<StudentDto>[] = [
@@ -93,7 +99,12 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
         isEmpty={list.data.length === 0}
         emptyMessage="No hay estudiantes que coincidan con los filtros."
       >
-        <DataTable caption="Estudiantes de la institución" columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
+        <DataTable
+          caption="Estudiantes de la institución"
+          columns={COLUMNS}
+          rows={list.data}
+          rowKey={(row) => row.id}
+        />
         <Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />
       </ListShell>
     </Card>

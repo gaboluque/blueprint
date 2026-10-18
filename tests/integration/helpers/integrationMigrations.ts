@@ -22,9 +22,7 @@ function appliedMigrationCount(result: unknown): number | null {
 async function isUpToDate(): Promise<boolean> {
   try {
     const db = Database.get();
-    const result = await db.execute(
-      sql`SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations`,
-    );
+    const result = await db.execute(sql`SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations`);
     const applied = appliedMigrationCount(result);
     return applied === expectedMigrationCount();
   } catch {

@@ -36,7 +36,12 @@ describe("AdminInstitutions", () => {
     const result = await AdminInstitutions.create(body);
 
     expect(requestOf(fetchMock)).toEqual({ url: "/api/admin/institutions", method: "POST", body });
-    expect(result).toEqual({ ok: false, status: 409, error: "Ese slug ya está en uso.", fieldErrors: { slug: "Ya existe." } });
+    expect(result).toEqual({
+      ok: false,
+      status: 409,
+      error: "Ese slug ya está en uso.",
+      fieldErrors: { slug: "Ya existe." },
+    });
   });
 
   it("updates an institution with PATCH on the item path", async () => {
@@ -65,7 +70,12 @@ describe("AdminInstitutions", () => {
   it("lists students under the institution path", async () => {
     const fetchMock = mockFetch(jsonResponse({ ok: true, data: [], pagination: { page: 1, pageSize: 20, total: 0 } }));
 
-    await AdminInstitutions.listStudents(institution.id, { page: 1, pageSize: 20, search: undefined, status: "inactive" });
+    await AdminInstitutions.listStudents(institution.id, {
+      page: 1,
+      pageSize: 20,
+      search: undefined,
+      status: "inactive",
+    });
 
     expect(requestOf(fetchMock).url).toBe(
       `/api/admin/institutions/${institution.id}/students?page=1&pageSize=20&status=inactive`,
@@ -75,11 +85,21 @@ describe("AdminInstitutions", () => {
   it("creates a student under the institution path", async () => {
     const student = studentDto();
     const fetchMock = mockFetch(jsonResponse({ ok: true, data: student }, 201));
-    const body = { firstName: "Ana", lastName: "Prueba", email: student.email, documentId: "1", status: "active" as const };
+    const body = {
+      firstName: "Ana",
+      lastName: "Prueba",
+      email: student.email,
+      documentId: "1",
+      status: "active" as const,
+    };
 
     const result = await AdminInstitutions.createStudent(institution.id, body);
 
-    expect(requestOf(fetchMock)).toEqual({ url: `/api/admin/institutions/${institution.id}/students`, method: "POST", body });
+    expect(requestOf(fetchMock)).toEqual({
+      url: `/api/admin/institutions/${institution.id}/students`,
+      method: "POST",
+      body,
+    });
     expect(result).toEqual({ ok: true, data: student });
   });
 

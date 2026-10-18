@@ -4,11 +4,7 @@ import { INTEGRATION_ADMIN } from "@tests/integration/factories/user.factory";
 
 function request(
   path: string,
-  {
-    method = "GET",
-    body,
-    cookie,
-  }: { method?: string; body?: unknown; cookie?: string } = {},
+  { method = "GET", body, cookie }: { method?: string; body?: unknown; cookie?: string } = {},
 ): Request {
   const headers = new Headers();
   if (cookie) headers.set("cookie", cookie);

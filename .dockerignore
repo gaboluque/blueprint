@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+coverage
+.git
+.idea
+.env
+.env*.local
+*.tsbuildinfo
+.tmp-dev.log
+npm-debug.log*
+db/migrations
+tests

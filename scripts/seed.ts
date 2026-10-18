@@ -29,11 +29,42 @@ const INSTITUTION_STAFF = [
 ];
 
 const STUDENTS = [
-  { slug: "u-ficticia-norte", firstName: "Ana", lastName: "Prueba", email: "ana.prueba@ficticia-norte.test", documentId: "1000000001" },
-  { slug: "u-ficticia-norte", firstName: "Bruno", lastName: "Demo", email: "bruno.demo@ficticia-norte.test", documentId: "1000000002" },
-  { slug: "u-ficticia-norte", firstName: "Carla", lastName: "Ejemplo", email: "carla.ejemplo@ficticia-norte.test", documentId: "1000000003", status: "inactive" as const },
-  { slug: "colegio-ejemplo-andino", firstName: "Diego", lastName: "Muestra", email: "diego.muestra@ejemplo-andino.test", documentId: "1000000004" },
-  { slug: "colegio-ejemplo-andino", firstName: "Elena", lastName: "Ficticia", email: "elena.ficticia@ejemplo-andino.test", documentId: "1000000005" },
+  {
+    slug: "u-ficticia-norte",
+    firstName: "Ana",
+    lastName: "Prueba",
+    email: "ana.prueba@ficticia-norte.test",
+    documentId: "1000000001",
+  },
+  {
+    slug: "u-ficticia-norte",
+    firstName: "Bruno",
+    lastName: "Demo",
+    email: "bruno.demo@ficticia-norte.test",
+    documentId: "1000000002",
+  },
+  {
+    slug: "u-ficticia-norte",
+    firstName: "Carla",
+    lastName: "Ejemplo",
+    email: "carla.ejemplo@ficticia-norte.test",
+    documentId: "1000000003",
+    status: "inactive" as const,
+  },
+  {
+    slug: "colegio-ejemplo-andino",
+    firstName: "Diego",
+    lastName: "Muestra",
+    email: "diego.muestra@ejemplo-andino.test",
+    documentId: "1000000004",
+  },
+  {
+    slug: "colegio-ejemplo-andino",
+    firstName: "Elena",
+    lastName: "Ficticia",
+    email: "elena.ficticia@ejemplo-andino.test",
+    documentId: "1000000005",
+  },
 ];
 
 async function seed(): Promise<void> {
@@ -54,7 +85,12 @@ async function seed(): Promise<void> {
   const seeded = await db
     .select({ id: institutions.id, slug: institutions.slug })
     .from(institutions)
-    .where(inArray(institutions.slug, INSTITUTIONS.map((institution) => institution.slug)));
+    .where(
+      inArray(
+        institutions.slug,
+        INSTITUTIONS.map((institution) => institution.slug),
+      ),
+    );
   const idBySlug = new Map(seeded.map((institution) => [institution.slug, institution.id]));
 
   for (const member of INSTITUTION_STAFF) {
@@ -73,10 +109,7 @@ async function seed(): Promise<void> {
       .returning({ id: users.id });
 
     const userId =
-      user?.id ??
-      (
-        await db.select({ id: users.id }).from(users).where(eq(users.email, member.email))
-      )[0]?.id;
+      user?.id ?? (await db.select({ id: users.id }).from(users).where(eq(users.email, member.email)))[0]?.id;
 
     if (!userId) throw new Error(`Seed staff user "${member.email}" is missing`);
 

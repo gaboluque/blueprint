@@ -19,7 +19,10 @@ export class RepoRegistry {
   readonly repos: AppRepos;
   private auditContext: AuditContext | null;
 
-  constructor(private readonly db: DbExecutor, auditContext: AuditContext | null = null) {
+  constructor(
+    private readonly db: DbExecutor,
+    auditContext: AuditContext | null = null,
+  ) {
     this.auditContext = auditContext;
     const auditRepo = this.buildAuditRepo();
     const sink: AuditSink = { record: (entry) => auditRepo.record(entry) };
