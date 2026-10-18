@@ -134,7 +134,7 @@ Every test uses **Arrange–Act–Assert** with a **blank line** between each bl
 
 `make format` · `make lint` · `make typecheck` · `make test` must be green before you call work done. A pre-commit hook (`husky` + `lint-staged`) runs format and lint on staged files automatically.
 
-**ESLint architecture.** `eslint.boundaries.mjs` defines layers (`frontend`, `app-ui`, `app-api`, `domains`, `lib`) and file categories (repos, services, views, …). `boundaries/dependencies` enforces import direction; complexity rules (`complexity`, `sonarjs/cognitive-complexity`, `max-depth`) apply under `src/**` only.
+**ESLint architecture.** `eslint.boundaries.mjs` defines layers (`frontend`, `app-ui`, `app-api`, `domains`, `lib`) and file categories (repos, services, views, …). `boundaries/dependencies` enforces import direction. Complexity (`complexity`, `sonarjs/cognitive-complexity`, `max-depth`) lives in `eslint.complexity.mjs` and runs via `npm run lint:complexity` (separate CI job; `make lint` runs both).
 
 API contract for the next slices: [`_docs`](_docs/api-contracts.md).
 

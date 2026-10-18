@@ -11,13 +11,56 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  complexity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:complexity
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgres://blueprint:blueprint@localhost:5432/blueprint
       SESSION_SECRET: ci-session-secret-that-is-long-enough-for-validation
       NODE_ENV: test
-
     services:
       postgres:
         image: postgres:17-alpine
@@ -32,32 +75,26 @@ jobs:
           --health-interval 2s
           --health-timeout 3s
           --health-retries 20
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+      - run: npm ci
+      - run: npm run db:migrate
+      - run: npm test
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Apply migrations
-        run: npm run db:migrate
-
-      - name: Format check
-        run: npm run format:check
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgres://blueprint:blueprint@localhost:5432/blueprint
+      SESSION_SECRET: ci-session-secret-that-is-long-enough-for-validation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build

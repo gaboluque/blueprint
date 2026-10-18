@@ -124,11 +124,11 @@ tests/integration/  Route tests against Postgres (*.integration.test.ts)
 
 ## Continuous integration
 
-Push and PR to `main` run [`.github/workflows/ci.yml`](.github/workflows/ci.yml): `npm ci` → Postgres 17 → migrate → format check → lint → typecheck → test → build.
+Push and PR to `main` run [`.github/workflows/ci.yml`](.github/workflows/ci.yml) as parallel jobs: format, lint, complexity, typecheck, test (Postgres 17 + migrate), and build.
 
 Locally: `make db-migrate && make check` with Postgres up and `.env` configured.
 
-For GitHub: require the CI workflow (or `quality` job) on `main` before merge.
+For GitHub: require the CI workflow on `main` before merge.
 
 Dependency and GitHub Actions version bumps come from [`.github/dependabot.yml`](.github/dependabot.yml) (weekly).
 

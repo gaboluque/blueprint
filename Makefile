@@ -38,6 +38,7 @@ format-check:
 
 lint:
 	npm run lint
+	npm run lint:complexity
 
 typecheck:
 	npm run typecheck

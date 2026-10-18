@@ -3,7 +3,6 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import boundaries from "eslint-plugin-boundaries";
 import prettier from "eslint-config-prettier";
-import sonarjs from "eslint-plugin-sonarjs";
 import { boundariesDependenciesRule, boundariesSettings } from "./eslint.boundaries.mjs";
 
 export default defineConfig([
@@ -20,12 +19,9 @@ export default defineConfig([
   },
   {
     files: ["src/**/*.{ts,tsx}"],
-    plugins: { boundaries, sonarjs },
+    plugins: { boundaries },
     settings: boundariesSettings,
     rules: {
-      complexity: ["error", { max: 15 }],
-      "max-depth": ["error", 4],
-      "sonarjs/cognitive-complexity": ["error", 15],
       "boundaries/dependencies": ["error", boundariesDependenciesRule],
       "boundaries/no-unknown-files": "error",
     },

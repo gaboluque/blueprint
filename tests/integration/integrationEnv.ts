@@ -11,6 +11,6 @@ export function applyIntegrationEnv(): void {
   process.env.SESSION_SECRET ??= "test-session-secret-that-is-long-enough-123";
   process.env.DATABASE_URL = integrationDatabaseUrl();
   process.env.BCRYPT_ROUNDS ??= "4";
-  process.env.NODE_ENV = "test";
+  Object.assign(process.env, { NODE_ENV: "test" });
   Env.clearCache();
 }
