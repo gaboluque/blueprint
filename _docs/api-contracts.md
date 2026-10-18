@@ -18,36 +18,39 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 - **Dates** are ISO 8601 strings (UTC).
 - **Archived institutions are read-only.** Any write on the institution or its students returns `409`.
 
-| Status | When                                                     |
-| ------ | -------------------------------------------------------- |
-| 200    | Read, update, archive                                    |
-| 201    | Created (`POST`)                                         |
-| 204    | Deleted, signed out (no body)                            |
-| 400    | Invalid params, query, or body (`fieldErrors` set)       |
-| 401    | Not signed in, session expired, wrong credentials        |
-| 403    | Policy denied (unreachable while admin is the only role) |
-| 404    | Resource doesn't exist                                   |
-| 409    | Unique conflict (email) or archived institution          |
-| 415    | Body isn't JSON                                          |
-| 500    | Unexpected; message is the route's `fallbackError`       |
+| Status | When                                                              |
+| ------ | ----------------------------------------------------------------- |
+| 200    | Read, update, archive                                             |
+| 201    | Created (`POST`)                                                  |
+| 204    | Signed out (no body)                                              |
+| 400    | Invalid params, query, or body (`fieldErrors` set)                |
+| 401    | Not signed in, session expired, wrong credentials                 |
+| 403    | Policy denied (unreachable: `AdminApiHandler` admits only admins) |
+| 404    | Resource doesn't exist                                            |
+| 409    | Unique conflict (email) or archived institution                   |
+| 415    | Body isn't JSON                                                   |
+| 429    | Too many sign-in attempts                                         |
+| 500    | Unexpected; message is the route's `fallbackError`                |
 
 ## Sessions
 
-| Method | Path                  | Body                  | Success                      | Errors                                      |
-| ------ | --------------------- | --------------------- | ---------------------------- | ------------------------------------------- |
-| POST   | `/api/admin/sessions` | `{ email, password }` | `201` `UserDto`, sets cookie | `400`, `401` "Incorrect email or password." |
-| DELETE | `/api/admin/sessions` | —                     | `204`, clears cookie         | —                                           |
-| GET    | `/api/admin/me`       | —                     | `200` `UserDto`              | `401`                                       |
+| Method | Path                  | Body                  | Success                      | Errors                                             |
+| ------ | --------------------- | --------------------- | ---------------------------- | -------------------------------------------------- |
+| POST   | `/api/admin/sessions` | `{ email, password }` | `201` `UserDto`, sets cookie | `400`, `401` "Incorrect email or password.", `429` |
+| DELETE | `/api/admin/sessions` | —                     | `204`, clears cookie         | —                                                  |
+| GET    | `/api/admin/me`       | —                     | `200` `UserDto`              | `401`                                              |
+
+Sign-in accepts admin users only; other roles get the same `401` as wrong credentials. It's limited to 5 attempts per minute per IP and email (in-memory `RateLimiter`). Sign-in and sign-out each write an `audit_events` row.
 
 ## Institutions
 
-| Method | Path                           | Query / body                                                                                          | Success                                                                                | Errors                        |
-| ------ | ------------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------- |
-| GET    | `/api/admin/institutions`      | `listInstitutionsQuerySchema`: `page`, `pageSize`, `search` (name), `status` (`active` \| `archived`) | `200` `InstitutionListItemDto[]` + `pagination`, newest first                          | `400`                         |
-| POST   | `/api/admin/institutions`      | `createInstitutionBodySchema`: `{ name, contactEmail }`                                               | `201` `InstitutionDto` (`status: "active"`)                                            | `400`                         |
-| GET    | `/api/admin/institutions/[id]` | —                                                                                                     | `200` `InstitutionDto` (archived ones too)                                             | `400`, `404`                  |
-| PATCH  | `/api/admin/institutions/[id]` | `updateInstitutionBodySchema`: any of `name`, `contactEmail` (at least one)                           | `200` `InstitutionDto`                                                                 | `400`, `404`, `409` archived  |
-| DELETE | `/api/admin/institutions/[id]` | —                                                                                                     | `200` `InstitutionDto` with `status: "archived"`, `archivedAt` set. Students are kept. | `404`, `409` already archived |
+| Method | Path                           | Query / body                                                                                          | Success                                                                                | Errors                               |
+| ------ | ------------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------ |
+| GET    | `/api/admin/institutions`      | `listInstitutionsQuerySchema`: `page`, `pageSize`, `search` (name), `status` (`active` \| `archived`) | `200` `InstitutionListItemDto[]` + `pagination`, newest first                          | `400`                                |
+| POST   | `/api/admin/institutions`      | `createInstitutionBodySchema`: `{ name, contactEmail }`                                               | `201` `InstitutionDto` (`status: "active"`)                                            | `400`                                |
+| GET    | `/api/admin/institutions/[id]` | —                                                                                                     | `200` `InstitutionDto` (archived ones too)                                             | `400`, `404`                         |
+| PATCH  | `/api/admin/institutions/[id]` | `updateInstitutionBodySchema`: any of `name`, `contactEmail` (at least one)                           | `200` `InstitutionDto`                                                                 | `400`, `404`, `409` archived         |
+| DELETE | `/api/admin/institutions/[id]` | —                                                                                                     | `200` `InstitutionDto` with `status: "archived"`, `archivedAt` set. Students are kept. | `400`, `404`, `409` already archived |
 
 `status` and `archivedAt` are never accepted in bodies; archiving only happens through `DELETE`. There is no hard delete and no unarchive yet.
 
@@ -80,6 +83,8 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 
 Errors come from `InstitutionErrors` / `StudentErrors` (`*.errors.ts`); don't inline new English strings in services.
 
+Every `create` and `update` through a repo (`BaseRepo`) records an `audit_events` row for the signed-in admin, including the request id and changed fields. The route handler sets the audit context after auth; services don't call the audit repo.
+
 ## Client modules
 
 Browser code calls the API through `src/frontend/gateway/*` on top of `ApiClient`. Each method returns `ApiResult<T>` (`{ ok: true, data, pagination? }` or `{ ok: false, error, fieldErrors? }`). Types come from domain views and validations via `import type`.
@@ -90,4 +95,9 @@ Browser code calls the API through `src/frontend/gateway/*` on top of `ApiClient
 | `AdminInstitutions` | `src/frontend/gateway/institutions.ts` | `list(query)` · `create(body)` · `get(id)` · `update(id, body)` · `archive(id)` · `listStudents(institutionId, query)` · `createStudent(institutionId, body)` |
 | `AdminStudents`     | `src/frontend/gateway/students.ts`     | `get(id)` · `update(id, body)` · `deactivate(id)` → `StudentDto` (same as `DELETE /api/admin/students/[id]`, `200`)                                           |
 
-Admin UI bindings: `LoginForm` → `AdminSession`; `InstitutionsListPage` / `InstitutionDetailPage` / `InstitutionForm` / `InstitutionStudentsSection` → `AdminInstitutions`; `StudentDetailPage` / `StudentForm` → `AdminStudents` and nested institution routes.
+Admin UI bindings:
+
+- `LoginForm`, `SignOutButton`, `useUnauthorizedRedirect` → `AdminSession`.
+- `InstitutionsListPage`, `InstitutionDetailPage`, `InstitutionStudentsSection` → `AdminInstitutions`.
+- `StudentDetailPage` → `AdminStudents`, plus `AdminInstitutions.get` for the parent institution.
+- `InstitutionForm` and `StudentForm` don't call the gateway. Their page passes a `submit` prop.

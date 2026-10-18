@@ -78,6 +78,10 @@ const bannerMessage = mutation.error && (mutation.fieldErrors._root ?? form.gene
 
 `applyFieldErrors` maps `_root` to `generalError`; other keys become field errors (and mark those fields touched).
 
+`useMutation` signs the user out and redirects to the login page on a `401`. Pass `{ redirectOnUnauthorized: false }` where `401` means wrong credentials (see `LoginForm`).
+
+Feature forms don't import the gateway. The page passes a `submit` prop (`(values) => Promise<ApiResult<T>>`) that the form hands to `useMutation`.
+
 ---
 
 ## Field bindings (`getField`)

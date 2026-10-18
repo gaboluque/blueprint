@@ -78,16 +78,22 @@ Reference: `tests/unit/domains/institutions/institution.model.test.ts`, `tests/u
 
 **Imports:** `@/*` → `src/`; `@tests/*` → `tests/` (Jest + `tsconfig` paths).
 
+Unit tests run in the `node` environment. Add `/** @jest-environment jsdom */` at the top of hook and component tests.
+
 Add cases to an existing `describe` for the subject when one is already there. Do not open redundant top-level describes for a one-off scenario.
 
 ### Integration file naming
 
 One integration file per route module:
 
-| Route                                                   | Test file                                                                 |
-| ------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `src/app/(server)/api/admin/institutions/route.ts`      | `tests/integration/api/admin/institutions.route.integration.test.ts`      |
-| `src/app/(server)/api/admin/institutions/[id]/route.ts` | `tests/integration/api/admin/institutions/[id]/route.integration.test.ts` |
+| Route                                                            | Test file                                                                          |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `src/app/(server)/api/admin/institutions/route.ts`               | `tests/integration/api/admin/institutions.route.integration.test.ts`               |
+| `src/app/(server)/api/admin/institutions/[id]/route.ts`          | `tests/integration/api/admin/institutions/[id]/route.integration.test.ts`          |
+| `src/app/(server)/api/admin/institutions/[id]/students/route.ts` | `tests/integration/api/admin/institutions/[id]/students.route.integration.test.ts` |
+| `src/app/(server)/api/admin/sessions/route.ts`                   | `tests/integration/api/admin/sessions/route.integration.test.ts`                   |
+
+A route with child routes (`institutions`, `[id]`) gets `<segment>.route.integration.test.ts` beside the child folder. Otherwise the file is `<segment>/route.integration.test.ts`.
 
 Inside the file: one top-level `describe("METHOD /api/…/path")` per exported handler (`GET`, `POST`, `PATCH`, …).
 
@@ -140,7 +146,7 @@ Reference: `tests/unit/app/api/admin/institutions/route.test.ts`, `tests/unit/li
 
 | Step           | What                                                                                                                               |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Isolation      | `await IntegrationDb.reset()` in `beforeEach`                                                                                      |
+| Isolation      | `await IntegrationDb.reset()` in `beforeEach` (truncates all tables, resets the sign-in `RateLimiter` and factory sequences)       |
 | 401 cases      | Reset only; call handler without `cookie`                                                                                          |
 | Authenticated  | Nested `describe("when authenticated")`: reset → `UserFactory.createAdmin()` → `IntegrationRoute.signInAsAdmin()` → reuse `cookie` |
 | Data           | `tests/integration/factories/*.factory.ts` (defaults aligned with `tests/factories/models.ts`)                                     |

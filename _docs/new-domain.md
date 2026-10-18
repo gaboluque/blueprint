@@ -23,7 +23,8 @@ Use `src/domains/institutions/` as the template. One user-facing capability usua
 Service order: load via repo → `if (!entity) throw XxxErrors.notFound()` → `Policy.authorize(XxxPolicy.canY(...))` → model rules → repo write.
 
 - [ ] Register repo in `src/lib/db/repoRegistry.ts` (`AppRepos` type + constructor)
-- [ ] Override `institutionIdOf` on repos whose rows are scoped to an institution (see `StudentsRepo`)
+- [ ] Override `institutionIdOf` on repos whose rows are scoped to an institution (see `StudentsRepo`). `BaseRepo.create`/`update` write an `audit_events` row with that id; set `auditable = false` only on the audit repo itself
+- [ ] Add the new table to the `TRUNCATE` list in `tests/integration/helpers/integrationDb.ts`
 
 ## 3. HTTP (`src/app/(server)/api/admin/...`)
 
