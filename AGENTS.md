@@ -1,4 +1,4 @@
-# AGENTS.md — saludamente-v2
+# AGENTS.md — blueprint
 
 Source of truth for AI agents working in this repo. Admin panel for institutions and their students. Next.js App Router · TypeScript strict · plain Postgres · Drizzle ORM · Zod · Jest.
 

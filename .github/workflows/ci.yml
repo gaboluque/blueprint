@@ -14,7 +14,7 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgres://saludamente:saludamente@localhost:5432/saludamente_v2
+      DATABASE_URL: postgres://blueprint:blueprint@localhost:5432/blueprint
       SESSION_SECRET: ci-session-secret-that-is-long-enough-for-validation
       NODE_ENV: test
 
@@ -22,13 +22,13 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_USER: saludamente
-          POSTGRES_PASSWORD: saludamente
-          POSTGRES_DB: saludamente_v2
+          POSTGRES_USER: blueprint
+          POSTGRES_PASSWORD: blueprint
+          POSTGRES_DB: blueprint
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U saludamente -d saludamente_v2"
+          --health-cmd "pg_isready -U blueprint -d blueprint"
           --health-interval 2s
           --health-timeout 3s
           --health-retries 20

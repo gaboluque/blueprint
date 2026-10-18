@@ -1,4 +1,4 @@
-# saludamente-v2
+# blueprint
 
 Admin panel for institutions and their students. Next.js (App Router) · TypeScript strict · Postgres in Docker · Drizzle ORM · Zod · Jest.
 
@@ -25,13 +25,13 @@ npm run dev       # http://localhost:3001
 
 | Email | Password |
 |---|---|
-| `admin@saludamente.dev` | `Admin123!` |
+| `admin@blueprint.dev` | `Admin123!` |
 
 Sign in from the terminal:
 
 ```bash
 curl -i -c cookies.txt -H 'content-type: application/json' \
-  -d '{"email":"admin@saludamente.dev","password":"Admin123!"}' \
+  -d '{"email":"admin@blueprint.dev","password":"Admin123!"}' \
   http://localhost:3001/api/admin/sessions
 curl -b cookies.txt http://localhost:3001/api/admin/me
 ```

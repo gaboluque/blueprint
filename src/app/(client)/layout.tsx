@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Saludamente · Administración",
+  title: "Blueprint · Administración",
   description: "Panel de administración de instituciones y estudiantes.",
 };
 

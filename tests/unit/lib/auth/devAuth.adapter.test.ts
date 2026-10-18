@@ -96,7 +96,7 @@ describe("DevAuthAdapter", () => {
     it("returns null for an unknown email", async () => {
       const provider = DevAuthAdapter.create({ secret: SECRET });
 
-      const session = await provider.signIn(lookupWith(null), { email: "nadie@saludamente.test", password: PASSWORD });
+      const session = await provider.signIn(lookupWith(null), { email: "nadie@blueprint.test", password: PASSWORD });
 
       expect(session).toBeNull();
     });

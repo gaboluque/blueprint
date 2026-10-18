@@ -1,6 +1,6 @@
 import type { NextResponse } from "next/server";
 
-const COOKIE_NAME = "saludamente_admin_session";
+const COOKIE_NAME = "blueprint_admin_session";
 
 function read(request: Request): string | null {
   const header = request.headers.get("cookie");

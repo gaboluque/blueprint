@@ -16,12 +16,12 @@ const admin = {
 
 function requestTo(path: string, cookie?: string): NextRequest {
   return new NextRequest(`http://localhost:3001${path}`, {
-    headers: cookie ? { cookie: `saludamente_admin_session=${cookie}` } : {},
+    headers: cookie ? { cookie: `blueprint_admin_session=${cookie}` } : {},
   });
 }
 
 function clearsSessionCookie(response: Response): boolean {
-  return /saludamente_admin_session=;.*Max-Age=0/i.test(response.headers.get("set-cookie") ?? "");
+  return /blueprint_admin_session=;.*Max-Age=0/i.test(response.headers.get("set-cookie") ?? "");
 }
 
 /** Follows proxy redirects the way a browser would, keeping cookies the proxy clears out of later hops. */

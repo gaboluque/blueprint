@@ -15,7 +15,7 @@ export function AdminShell({ adminName, children }: AdminShellProps) {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-6">
             <Link href={AdminRoutes.home} className="font-semibold text-teal-800">
-              Saludamente · Admin
+              Blueprint · Admin
             </Link>
             <nav aria-label="Principal">
               <ul className="flex gap-4 text-sm">

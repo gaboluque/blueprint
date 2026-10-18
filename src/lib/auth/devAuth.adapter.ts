@@ -5,7 +5,7 @@ import type { AuthProvider, AuthRepos, AuthSession, Credentials } from "./auth.p
 import { Passwords } from "./password";
 
 const ALGORITHM = "HS256";
-const ISSUER = "saludamente-v2";
+const ISSUER = "blueprint";
 const AUDIENCE = "admin";
 const DEFAULT_TTL_SECONDS = 60 * 60 * 8;
 // Compared against when the email is unknown, so response time doesn't reveal which accounts exist.

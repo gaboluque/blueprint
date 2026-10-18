@@ -4,7 +4,7 @@ import { Database } from "@/lib/db/client";
 import { institutionMembers, institutions, students, users } from "@/lib/db/schema";
 
 // Fake data only. Idempotent: rows are keyed by unique email/slug and skipped when present.
-const DEV_ADMIN = { email: "admin@saludamente.dev", password: "Admin123!", name: "Administradora Dev" };
+const DEV_ADMIN = { email: "admin@blueprint.dev", password: "Admin123!", name: "Administradora Dev" };
 
 const INSTITUTIONS = [
   { name: "Universidad Ficticia del Norte", slug: "u-ficticia-norte", contactEmail: "bienestar@ficticia-norte.test" },

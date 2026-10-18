@@ -61,7 +61,7 @@ describe("POST /api/admin/sessions", () => {
     const response = await POST(
       RouteTestSupport.request(PATH, {
         method: "POST",
-        body: { email: "admin@saludamente.test", password: "mala" },
+        body: { email: "admin@blueprint.test", password: "mala" },
         signedIn: false,
       }),
     );

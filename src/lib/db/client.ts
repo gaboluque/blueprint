@@ -12,20 +12,20 @@ export type DbExecutor = PgDatabase<NodePgQueryResultHKT, Schema>;
 type DbHandle = { pool: Pool; db: Db };
 
 // Cached on globalThis so dev hot reload reuses one pool instead of leaking connections.
-const globalForDb = globalThis as typeof globalThis & { __saludamenteDb?: DbHandle };
+const globalForDb = globalThis as typeof globalThis & { __blueprintDb?: DbHandle };
 
 function get(): Db {
-  if (!globalForDb.__saludamenteDb) {
+  if (!globalForDb.__blueprintDb) {
     const pool = new Pool({ connectionString: Env.get().DATABASE_URL, max: 10 });
-    globalForDb.__saludamenteDb = { pool, db: drizzle({ client: pool, schema }) };
+    globalForDb.__blueprintDb = { pool, db: drizzle({ client: pool, schema }) };
   }
-  return globalForDb.__saludamenteDb.db;
+  return globalForDb.__blueprintDb.db;
 }
 
 async function close(): Promise<void> {
-  const handle = globalForDb.__saludamenteDb;
+  const handle = globalForDb.__blueprintDb;
   if (!handle) return;
-  globalForDb.__saludamenteDb = undefined;
+  globalForDb.__blueprintDb = undefined;
   await handle.pool.end();
 }
 

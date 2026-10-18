@@ -46,7 +46,7 @@ export function buildStudent(overrides: Partial<StudentProps> = {}): Student {
 export function buildUser(overrides: Partial<UserProps> = {}): User {
   return new User({
     id: USER_ID,
-    email: "admin@saludamente.test",
+    email: "admin@blueprint.test",
     name: "Admin Prueba",
     role: "admin",
     passwordHash: "not-a-real-hash",
