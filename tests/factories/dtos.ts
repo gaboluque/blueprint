@@ -7,7 +7,6 @@ export function institutionDto(overrides: Partial<InstitutionDto> = {}): Institu
   return {
     id: "6f1c2c7e-6b1a-4c55-9a0e-3d0f7d6b2a11",
     name: "Universidad Ficticia del Norte",
-    slug: "ficticia-norte",
     contactEmail: "contacto@ficticia.test",
     status: "active",
     archivedAt: null,

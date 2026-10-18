@@ -14,13 +14,13 @@ export function AdminShell({ adminName, children }: AdminShellProps) {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex items-center gap-6">
-            <Link href={AdminRoutes.home} className="font-semibold text-teal-800">
+            <Link href={AdminRoutes.home} className="font-semibold text-sky-800">
               Blueprint · Admin
             </Link>
             <nav aria-label="Main">
               <ul className="flex gap-4 text-sm">
                 <li>
-                  <Link href={AdminRoutes.institutions} className="text-slate-700 hover:text-teal-800">
+                  <Link href={AdminRoutes.institutions} className="text-slate-700 hover:text-sky-800">
                     Institutions
                   </Link>
                 </li>

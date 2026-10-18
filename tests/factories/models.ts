@@ -14,7 +14,6 @@ export function buildInstitution(overrides: Partial<InstitutionProps> = {}): Ins
   return new Institution({
     id: INSTITUTION_ID,
     name: "Universidad Ficticia",
-    slug: "u-ficticia",
     contactEmail: "bienestar@ficticia.test",
     status: "active",
     archivedAt: null,

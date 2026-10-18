@@ -1,9 +1,11 @@
 import { useId } from "react";
 import { FieldError, fieldControlClasses } from "./FieldError";
+import type { SelectFieldBinding } from "@/frontend/hooks/useForm";
 
 export type SelectOption<V extends string = string> = { value: V; label: string };
 
-type SelectFieldProps<V extends string> = {
+type SelectFieldControlledProps<V extends string> = {
+  field?: undefined;
   label: string;
   value: V;
   options: SelectOption<V>[];
@@ -13,17 +15,64 @@ type SelectFieldProps<V extends string> = {
   className?: string;
 };
 
-export function SelectField<V extends string>({
-  label,
-  value,
-  options,
-  onChange,
-  error,
-  name,
-  className,
-}: SelectFieldProps<V>) {
-  const selectId = useId();
-  const errorId = `${selectId}-error`;
+type SelectFieldBoundProps = {
+  field: SelectFieldBinding;
+  label: string;
+  options: SelectOption[];
+  value?: never;
+  onChange?: never;
+  error?: never;
+  name?: never;
+  className?: string;
+};
+
+type SelectFieldProps<V extends string> = SelectFieldControlledProps<V> | SelectFieldBoundProps;
+
+export function SelectField<V extends string>(props: SelectFieldProps<V>) {
+  const generatedId = useId();
+
+  if ("field" in props && props.field) {
+    const { label, field, options, className } = props;
+    const {
+      error,
+      errorId,
+      id,
+      name,
+      value,
+      onValueChange,
+      onBlur,
+      "aria-invalid": ariaInvalid,
+      "aria-describedby": ariaDescribedBy,
+    } = field;
+
+    return (
+      <div className={className}>
+        <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">
+          {label}
+        </label>
+        <select
+          id={id}
+          name={name}
+          value={value}
+          onChange={(event) => onValueChange(event.target.value)}
+          onBlur={onBlur}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedBy}
+          className={fieldControlClasses(Boolean(error))}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <FieldError id={errorId} message={error} />
+      </div>
+    );
+  }
+
+  const { label, value, options, onChange, error, name, className } = props;
+  const errorId = `${generatedId}-error`;
 
   const onSelect = (selected: string) => {
     const option = options.find((candidate) => candidate.value === selected);
@@ -32,11 +81,11 @@ export function SelectField<V extends string>({
 
   return (
     <div className={className}>
-      <label htmlFor={selectId} className="mb-1 block text-sm font-medium text-slate-700">
+      <label htmlFor={generatedId} className="mb-1 block text-sm font-medium text-slate-700">
         {label}
       </label>
       <select
-        id={selectId}
+        id={generatedId}
         name={name}
         value={value}
         onChange={(event) => onSelect(event.target.value)}

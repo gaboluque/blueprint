@@ -22,7 +22,6 @@ function InstitutionDetails({ institution }: { institution: InstitutionDto }) {
   return (
     <DescriptionList
       items={[
-        { term: "Slug", detail: institution.slug },
         { term: "Contact email", detail: institution.contactEmail },
         { term: "Created", detail: formatDate(institution.createdAt) },
         { term: "Archived", detail: institution.archivedAt ? formatDate(institution.archivedAt) : "—" },
@@ -62,7 +61,7 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
   return (
     <>
       <div>
-        <Link href={AdminRoutes.institutions} className="text-sm text-teal-800 hover:underline">
+        <Link href={AdminRoutes.institutions} className="text-sm text-sky-800 hover:underline">
           ← Institutions
         </Link>
         <div className="mt-2 flex items-center gap-3">
@@ -95,7 +94,7 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
       >
         {isEditing ? (
           <InstitutionForm
-            initialValues={{ name: institution.name, slug: institution.slug, contactEmail: institution.contactEmail }}
+            initialValues={{ name: institution.name, contactEmail: institution.contactEmail }}
             submitLabel="Save changes"
             submit={update}
             onSuccess={(updated) => {

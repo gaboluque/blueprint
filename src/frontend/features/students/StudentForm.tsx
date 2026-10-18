@@ -2,10 +2,10 @@
 
 import type { FormEvent } from "react";
 import type { ApiResult } from "@/frontend/gateway/apiClient";
-import type { CreateStudentBody } from "@/domains/students/validations/student.validation";
+import { createStudentBodySchema, type CreateStudentBody } from "@/domains/students/validations/student.validation";
 import type { StudentDto } from "@/domains/students/views/student.view";
 import { DEFAULT_STUDENT_STATUS, STUDENT_STATUS_LABELS } from "@/frontend/components/admin/statusLabels";
-import { useFormValues } from "@/frontend/hooks/useFormValues";
+import { useForm } from "@/frontend/hooks/useForm";
 import { useMutation } from "@/frontend/hooks/useMutation";
 import { FormActions } from "@/frontend/components/shared/FormActions";
 import { recordToOptions } from "@/frontend/components/shared/listTypes";
@@ -21,6 +21,7 @@ type StudentFormProps = {
   submit: (values: StudentFormValues) => Promise<ApiResult<StudentDto>>;
   onSuccess: (student: StudentDto) => void;
   onCancel: () => void;
+  idPrefix?: string;
 };
 
 const EMPTY_VALUES: StudentFormValues = {
@@ -39,57 +40,41 @@ export function StudentForm({
   submit,
   onSuccess,
   onCancel,
+  idPrefix = "student",
 }: StudentFormProps) {
-  const { values, setField } = useFormValues(initialValues);
+  const form = useForm({
+    idPrefix,
+    initialValues,
+    schema: createStudentBodySchema,
+  });
   const mutation = useMutation(submit);
-  const { fieldErrors } = mutation;
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    const result = await mutation.run(values);
-    if (result.ok) onSuccess(result.data);
+    form.setGeneralError(null);
+
+    const validated = form.validate();
+    if (!validated.ok) return;
+
+    const result = await mutation.run(validated.data);
+    if (!result.ok) {
+      form.applyFieldErrors(result.fieldErrors ?? {});
+      return;
+    }
+    onSuccess(result.data);
   };
+
+  const bannerMessage = mutation.error && (mutation.fieldErrors._root ?? form.generalError ?? mutation.error);
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4" aria-label={submitLabel}>
-      {mutation.error && <Alert>{fieldErrors._root ?? mutation.error}</Alert>}
+      {bannerMessage ? <Alert>{bannerMessage}</Alert> : null}
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField
-          label="First name"
-          required
-          value={values.firstName}
-          onChange={setField("firstName")}
-          error={fieldErrors.firstName}
-        />
-        <TextField
-          label="Last name"
-          required
-          value={values.lastName}
-          onChange={setField("lastName")}
-          error={fieldErrors.lastName}
-        />
-        <TextField
-          label="Email"
-          type="email"
-          required
-          value={values.email}
-          onChange={setField("email")}
-          error={fieldErrors.email}
-        />
-        <TextField
-          label="Document ID"
-          required
-          value={values.documentId}
-          onChange={setField("documentId")}
-          error={fieldErrors.documentId}
-        />
-        <SelectField
-          label="Status"
-          value={values.status}
-          options={STATUS_OPTIONS}
-          onChange={setField("status")}
-          error={fieldErrors.status}
-        />
+        <TextField label="First name" required field={form.getField("firstName")} />
+        <TextField label="Last name" required field={form.getField("lastName")} />
+        <TextField label="Email" type="email" required field={form.getField("email")} />
+        <TextField label="Document ID" required field={form.getField("documentId")} />
+        <SelectField label="Status" options={STATUS_OPTIONS} field={form.getField("status", { select: true })} />
       </div>
       <FormActions submitLabel={submitLabel} pending={mutation.pending} onCancel={onCancel} />
     </form>

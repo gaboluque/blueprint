@@ -51,7 +51,7 @@ Fixtures and sign-in belong in **Arrange** (or shared `beforeEach` inside the sa
 
 ```ts
 it("returns the institution stored in the database", async () => {
-  const institution = await InstitutionFactory.create({ slug: "detalle-int", name: "Detalle Integración" });
+  const institution = await InstitutionFactory.create({ name: "Detalle Integración" });
   const context = IntegrationRoute.routeContext({ id: institution.id });
 
   const response = await GET(

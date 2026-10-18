@@ -15,7 +15,7 @@ describe("GET /api/admin/students/[id]", () => {
     });
 
     it("returns 401 when the session cookie is missing", async () => {
-      const institution = await InstitutionFactory.create({ slug: "student-get-int" });
+      const institution = await InstitutionFactory.create();
       const student = await StudentFactory.create({ institutionId: institution.id });
       const context = IntegrationRoute.routeContext({ id: student.id });
 
@@ -35,7 +35,7 @@ describe("GET /api/admin/students/[id]", () => {
     });
 
     it("returns the student stored in the database", async () => {
-      const institution = await InstitutionFactory.create({ slug: "student-get-int" });
+      const institution = await InstitutionFactory.create();
       const student = await StudentFactory.create({
         institutionId: institution.id,
         firstName: "Diana",
@@ -83,7 +83,7 @@ describe("PATCH /api/admin/students/[id]", () => {
   });
 
   it("persists the patch and returns the updated student", async () => {
-    const institution = await InstitutionFactory.create({ slug: "student-patch-int" });
+    const institution = await InstitutionFactory.create();
     const student = await StudentFactory.create({
       institutionId: institution.id,
       lastName: "Antes",
@@ -109,7 +109,7 @@ describe("PATCH /api/admin/students/[id]", () => {
   });
 
   it("returns 409 when the student's institution is archived", async () => {
-    const institution = await InstitutionFactory.create({ slug: "student-patch-archived-int", status: "archived" });
+    const institution = await InstitutionFactory.create({ status: "archived" });
     const student = await StudentFactory.create({ institutionId: institution.id });
     const context = IntegrationRoute.routeContext({ id: student.id });
 
@@ -136,7 +136,7 @@ describe("DELETE /api/admin/students/[id]", () => {
   });
 
   it("deactivates the student in the database", async () => {
-    const institution = await InstitutionFactory.create({ slug: "student-delete-int" });
+    const institution = await InstitutionFactory.create();
     const student = await StudentFactory.create({ institutionId: institution.id });
     const context = IntegrationRoute.routeContext({ id: student.id });
 
@@ -154,7 +154,7 @@ describe("DELETE /api/admin/students/[id]", () => {
   });
 
   it("returns 409 when the student is already inactive", async () => {
-    const institution = await InstitutionFactory.create({ slug: "student-inactive-int" });
+    const institution = await InstitutionFactory.create();
     const student = await StudentFactory.create({ institutionId: institution.id, status: "inactive" });
     const context = IntegrationRoute.routeContext({ id: student.id });
 

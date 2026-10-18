@@ -3,7 +3,7 @@ import { cx } from "./cx";
 export function fieldControlClasses(invalid: boolean): string {
   return cx(
     "block w-full rounded-md border bg-white px-3 py-2 text-sm",
-    "focus:outline-2 focus:outline-offset-0 focus:outline-teal-700",
+    "focus:outline-2 focus:outline-offset-0 focus:outline-sky-600",
     invalid ? "border-red-600" : "border-slate-300",
   );
 }

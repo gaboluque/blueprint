@@ -5,7 +5,7 @@ function next(): number {
   return counter;
 }
 
-/** Resets between tests so slugs/emails stay deterministic within a case. */
+/** Resets between tests so factory emails stay deterministic within a case. */
 function reset(): void {
   counter = 0;
 }

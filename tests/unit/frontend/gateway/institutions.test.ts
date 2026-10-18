@@ -28,10 +28,14 @@ describe("AdminInstitutions", () => {
   });
 
   it("creates an institution and surfaces field errors on conflict", async () => {
-    const body = { name: "Nueva", slug: "ficticia-norte", contactEmail: "a@ficticia.test" };
+    const body = { name: "Nueva", contactEmail: "a@ficticia.test" };
     const fetchMock = mockFetch(
       jsonResponse(
-        { ok: false, error: "An institution with that slug already exists.", fieldErrors: { slug: "Already exists." } },
+        {
+          ok: false,
+          error: "A record with those values already exists.",
+          fieldErrors: { contactEmail: "Already exists." },
+        },
         409,
       ),
     );
@@ -42,8 +46,8 @@ describe("AdminInstitutions", () => {
     expect(result).toEqual({
       ok: false,
       status: 409,
-      error: "An institution with that slug already exists.",
-      fieldErrors: { slug: "Already exists." },
+      error: "A record with those values already exists.",
+      fieldErrors: { contactEmail: "Already exists." },
     });
   });
 

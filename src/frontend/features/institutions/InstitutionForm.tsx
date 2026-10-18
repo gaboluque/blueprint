@@ -2,9 +2,12 @@
 
 import type { FormEvent } from "react";
 import type { ApiResult } from "@/frontend/gateway/apiClient";
-import type { CreateInstitutionBody } from "@/domains/institutions/validations/institution.validation";
+import {
+  createInstitutionBodySchema,
+  type CreateInstitutionBody,
+} from "@/domains/institutions/validations/institution.validation";
 import type { InstitutionDto } from "@/domains/institutions/views/institution.view";
-import { useFormValues } from "@/frontend/hooks/useFormValues";
+import { useForm } from "@/frontend/hooks/useForm";
 import { useMutation } from "@/frontend/hooks/useMutation";
 import { FormActions } from "@/frontend/components/shared/FormActions";
 import { Alert } from "@/frontend/components/ui/Alert";
@@ -18,9 +21,10 @@ type InstitutionFormProps = {
   submit: (values: InstitutionFormValues) => Promise<ApiResult<InstitutionDto>>;
   onSuccess: (institution: InstitutionDto) => void;
   onCancel: () => void;
+  idPrefix?: string;
 };
 
-const EMPTY_VALUES: InstitutionFormValues = { name: "", slug: "", contactEmail: "" };
+const EMPTY_VALUES: InstitutionFormValues = { name: "", contactEmail: "" };
 
 export function InstitutionForm({
   initialValues = EMPTY_VALUES,
@@ -28,31 +32,38 @@ export function InstitutionForm({
   submit,
   onSuccess,
   onCancel,
+  idPrefix = "institution",
 }: InstitutionFormProps) {
-  const { values, setField } = useFormValues(initialValues);
+  const form = useForm({
+    idPrefix,
+    initialValues,
+    schema: createInstitutionBodySchema,
+  });
   const mutation = useMutation(submit);
-  const { fieldErrors } = mutation;
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    const result = await mutation.run(values);
-    if (result.ok) onSuccess(result.data);
+    form.setGeneralError(null);
+
+    const validated = form.validate();
+    if (!validated.ok) return;
+
+    const result = await mutation.run(validated.data);
+    if (!result.ok) {
+      form.applyFieldErrors(result.fieldErrors ?? {});
+      return;
+    }
+    onSuccess(result.data);
   };
+
+  const bannerMessage = mutation.error && (mutation.fieldErrors._root ?? form.generalError ?? mutation.error);
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4" aria-label={submitLabel}>
-      {mutation.error && <Alert>{fieldErrors._root ?? mutation.error}</Alert>}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <TextField label="Name" required value={values.name} onChange={setField("name")} error={fieldErrors.name} />
-        <TextField label="Slug" required value={values.slug} onChange={setField("slug")} error={fieldErrors.slug} />
-        <TextField
-          label="Contact email"
-          type="email"
-          required
-          value={values.contactEmail}
-          onChange={setField("contactEmail")}
-          error={fieldErrors.contactEmail}
-        />
+      {bannerMessage ? <Alert>{bannerMessage}</Alert> : null}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TextField label="Name" required field={form.getField("name")} />
+        <TextField label="Contact email" type="email" required field={form.getField("contactEmail")} />
       </div>
       <FormActions submitLabel={submitLabel} pending={mutation.pending} onCancel={onCancel} />
     </form>

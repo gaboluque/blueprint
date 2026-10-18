@@ -65,14 +65,17 @@ describe("UpdateInstitution", () => {
     expect(update).not.toHaveBeenCalled();
   });
 
-  it("propagates the slug conflict from the repo", async () => {
+  it("propagates a conflict from the repo", async () => {
     const { repos, findById, update } = setup();
     findById.mockResolvedValue(buildInstitution());
-    update.mockRejectedValue(new ConflictError(INSTITUTION_ERROR_MESSAGES.slugTaken));
+    update.mockRejectedValue(new ConflictError("A record with those values already exists."));
 
-    const act = UpdateInstitution.call(repos, buildAdminActor(), { id: INSTITUTION_ID, patch: { slug: "u-otra" } });
+    const act = UpdateInstitution.call(repos, buildAdminActor(), {
+      id: INSTITUTION_ID,
+      patch: { contactEmail: "otro@ficticia.test" },
+    });
 
-    await expect(act).rejects.toThrow(INSTITUTION_ERROR_MESSAGES.slugTaken);
+    await expect(act).rejects.toThrow("A record with those values already exists.");
   });
 
   it("rejects a caller the policy denies without writing", async () => {

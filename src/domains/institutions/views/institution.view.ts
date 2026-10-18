@@ -6,7 +6,6 @@ import type { Institution } from "../institution.model";
 export type InstitutionDto = {
   id: string;
   name: string;
-  slug: string;
   contactEmail: string;
   status: InstitutionStatus;
   archivedAt: string | null;
@@ -22,7 +21,6 @@ function format(institution: Institution): InstitutionDto {
   return {
     id: institution.id,
     name: institution.name,
-    slug: institution.slug,
     contactEmail: institution.contactEmail,
     status: institution.status,
     archivedAt: institution.archivedAt?.toISOString() ?? null,

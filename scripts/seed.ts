@@ -3,35 +3,33 @@ import { Passwords } from "@/lib/auth/password";
 import { Database } from "@/lib/db/client";
 import { institutionMembers, institutions, students, users } from "@/lib/db/schema";
 
-// Fake data only. Idempotent: rows are keyed by unique email/slug and skipped when present.
+// Fake data only. Idempotent: rows are keyed by unique email and skipped when present.
 const DEV_ADMIN = { email: "admin@blueprint.dev", password: "Admin123!", name: "Dev Admin" };
 
-const NORTH_UNIVERSITY_SLUG = "north-fictional-university";
-const ANDEAN_COLLEGE_SLUG = "andean-example-college";
+const NORTH_UNIVERSITY_EMAIL = "wellness@north-university.test";
+const ANDEAN_COLLEGE_EMAIL = "contact@andean-college.test";
 
 const INSTITUTIONS = [
   {
     name: "North Fictional University",
-    slug: NORTH_UNIVERSITY_SLUG,
-    contactEmail: "wellness@north-university.test",
+    contactEmail: NORTH_UNIVERSITY_EMAIL,
   },
   {
     name: "Andean Example College",
-    slug: ANDEAN_COLLEGE_SLUG,
-    contactEmail: "contact@andean-college.test",
+    contactEmail: ANDEAN_COLLEGE_EMAIL,
   },
 ];
 
 const INSTITUTION_STAFF = [
   {
-    slug: NORTH_UNIVERSITY_SLUG,
+    institutionContactEmail: NORTH_UNIVERSITY_EMAIL,
     email: "admin@north-university.test",
     password: "Staff123!",
     name: "North Institution Admin",
     role: "admin" as const,
   },
   {
-    slug: NORTH_UNIVERSITY_SLUG,
+    institutionContactEmail: NORTH_UNIVERSITY_EMAIL,
     email: "teacher@north-university.test",
     password: "Staff123!",
     name: "North Demo Teacher",
@@ -41,21 +39,21 @@ const INSTITUTION_STAFF = [
 
 const STUDENTS = [
   {
-    slug: NORTH_UNIVERSITY_SLUG,
+    institutionContactEmail: NORTH_UNIVERSITY_EMAIL,
     firstName: "Anna",
     lastName: "Sample",
     email: "anna.sample@north-university.test",
     documentId: "1000000001",
   },
   {
-    slug: NORTH_UNIVERSITY_SLUG,
+    institutionContactEmail: NORTH_UNIVERSITY_EMAIL,
     firstName: "Brian",
     lastName: "Demo",
     email: "brian.demo@north-university.test",
     documentId: "1000000002",
   },
   {
-    slug: NORTH_UNIVERSITY_SLUG,
+    institutionContactEmail: NORTH_UNIVERSITY_EMAIL,
     firstName: "Claire",
     lastName: "Example",
     email: "claire.example@north-university.test",
@@ -63,14 +61,14 @@ const STUDENTS = [
     status: "inactive" as const,
   },
   {
-    slug: ANDEAN_COLLEGE_SLUG,
+    institutionContactEmail: ANDEAN_COLLEGE_EMAIL,
     firstName: "Daniel",
     lastName: "Fixture",
     email: "daniel.fixture@andean-college.test",
     documentId: "1000000004",
   },
   {
-    slug: ANDEAN_COLLEGE_SLUG,
+    institutionContactEmail: ANDEAN_COLLEGE_EMAIL,
     firstName: "Emily",
     lastName: "Fictional",
     email: "emily.fictional@andean-college.test",
@@ -91,22 +89,31 @@ async function seed(): Promise<void> {
     })
     .onConflictDoNothing({ target: users.email });
 
-  await db.insert(institutions).values(INSTITUTIONS).onConflictDoNothing({ target: institutions.slug });
+  for (const institution of INSTITUTIONS) {
+    const [existing] = await db
+      .select({ id: institutions.id })
+      .from(institutions)
+      .where(eq(institutions.contactEmail, institution.contactEmail))
+      .limit(1);
+    if (!existing) {
+      await db.insert(institutions).values(institution);
+    }
+  }
 
   const seeded = await db
-    .select({ id: institutions.id, slug: institutions.slug })
+    .select({ id: institutions.id, contactEmail: institutions.contactEmail })
     .from(institutions)
     .where(
       inArray(
-        institutions.slug,
-        INSTITUTIONS.map((institution) => institution.slug),
+        institutions.contactEmail,
+        INSTITUTIONS.map((item) => item.contactEmail),
       ),
     );
-  const idBySlug = new Map(seeded.map((institution) => [institution.slug, institution.id]));
+  const idByContactEmail = new Map(seeded.map((institution) => [institution.contactEmail, institution.id]));
 
   for (const member of INSTITUTION_STAFF) {
-    const institutionId = idBySlug.get(member.slug);
-    if (!institutionId) throw new Error(`Seed institution "${member.slug}" is missing`);
+    const institutionId = idByContactEmail.get(member.institutionContactEmail);
+    if (!institutionId) throw new Error(`Seed institution "${member.institutionContactEmail}" is missing`);
 
     const [user] = await db
       .insert(users)
@@ -133,9 +140,9 @@ async function seed(): Promise<void> {
   await db
     .insert(students)
     .values(
-      STUDENTS.map(({ slug, ...student }) => {
-        const institutionId = idBySlug.get(slug);
-        if (!institutionId) throw new Error(`Seed institution "${slug}" is missing`);
+      STUDENTS.map(({ institutionContactEmail, ...student }) => {
+        const institutionId = idByContactEmail.get(institutionContactEmail);
+        if (!institutionId) throw new Error(`Seed institution "${institutionContactEmail}" is missing`);
         return { ...student, institutionId };
       }),
     )
@@ -143,7 +150,7 @@ async function seed(): Promise<void> {
 
   console.log(`Seed complete. Admin: ${DEV_ADMIN.email} / ${DEV_ADMIN.password}`);
   console.log(
-    `Staff (${NORTH_UNIVERSITY_SLUG}): ${INSTITUTION_STAFF.map((m) => `${m.email} / ${m.password}`).join(", ")}`,
+    `Staff (${NORTH_UNIVERSITY_EMAIL}): ${INSTITUTION_STAFF.map((m) => `${m.email} / ${m.password}`).join(", ")}`,
   );
 }
 

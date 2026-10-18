@@ -23,7 +23,6 @@ const norte = institutionListItemDto({ id: "a0000000-0000-4000-8000-000000000001
 const sur = institutionListItemDto({
   id: "a0000000-0000-4000-8000-000000000002",
   name: "Sur",
-  slug: "sur",
   status: "archived",
   archivedAt: "2026-02-01T10:00:00.000Z",
 });
@@ -37,15 +36,13 @@ describe("InstitutionsListPage", () => {
     list.mockResolvedValue({ ok: true, data: [norte, sur], pagination: { page: 1, pageSize: 20, total: 2 } });
   });
 
-  it("renders each institution with its student count, status, and detail link", async () => {
+  it("renders each institution with its student count, status, and opens detail on row click", async () => {
     render(<InstitutionsListPage />);
 
-    await screen.findByRole("link", { name: "Norte" });
+    await screen.findByText("Norte");
     const [, norteRow, surRow] = screen.getAllByRole("row");
-    expect(within(norteRow as HTMLElement).getByRole("link", { name: "Norte" })).toHaveAttribute(
-      "href",
-      `/admin/institutions/${norte.id}`,
-    );
+    await userEvent.click(norteRow as HTMLElement);
+    expect(mockRouter.push).toHaveBeenCalledWith(`/admin/institutions/${norte.id}`);
     expect(within(norteRow as HTMLElement).getByRole("cell", { name: "3" })).toBeInTheDocument();
     expect(within(norteRow as HTMLElement).getByText("Active")).toBeInTheDocument();
     expect(within(surRow as HTMLElement).getByText("Archived")).toBeInTheDocument();
@@ -54,7 +51,7 @@ describe("InstitutionsListPage", () => {
 
   it("refetches from page 1 when the status filter changes", async () => {
     render(<InstitutionsListPage />);
-    await screen.findByRole("link", { name: "Norte" });
+    await screen.findByText("Norte");
 
     await userEvent.selectOptions(screen.getByLabelText("Status"), "archived");
 
@@ -71,14 +68,14 @@ describe("InstitutionsListPage", () => {
     await waitFor(() =>
       expect(list).toHaveBeenCalledWith(expect.objectContaining({ status: "archived", search: "norte", page: 1 })),
     );
-    expect(screen.getByLabelText("Search by name or slug")).toHaveValue("norte");
+    expect(screen.getByLabelText("Search by name")).toHaveValue("norte");
   });
 
   it("applies the search only when it is submitted", async () => {
     render(<InstitutionsListPage />);
-    await screen.findByRole("link", { name: "Norte" });
+    await screen.findByText("Norte");
 
-    await userEvent.type(screen.getByLabelText("Search by name or slug"), "  norte ");
+    await userEvent.type(screen.getByLabelText("Search by name"), "  norte ");
     const callsWhileTyping = list.mock.calls.length;
     await userEvent.click(screen.getByRole("button", { name: "Search" }));
 
@@ -94,7 +91,7 @@ describe("InstitutionsListPage", () => {
     expect(alert).toHaveTextContent("We couldn't load institutions.");
     await userEvent.click(within(alert).getByRole("button", { name: "Retry" }));
 
-    expect(await screen.findByRole("link", { name: "Norte" })).toBeInTheDocument();
+    expect(await screen.findByText("Norte")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 

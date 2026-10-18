@@ -1,5 +1,4 @@
 import { GET, POST } from "@/app/(server)/api/admin/institutions/route";
-import { INSTITUTION_ERROR_MESSAGES } from "@/domains/institutions/institution.errors";
 import { CreateInstitution } from "@/domains/institutions/services/createInstitution.service";
 import { ListInstitutions } from "@/domains/institutions/services/listInstitutions.service";
 import { ConflictError } from "@/lib/errors/domain.errors";
@@ -24,14 +23,13 @@ const createInstitution = jest.mocked(CreateInstitution.call);
 const INSTITUTION_DTO = {
   id: INSTITUTION_ID,
   name: "Universidad Ficticia",
-  slug: "u-ficticia",
   contactEmail: "bienestar@ficticia.test",
   status: "active",
   archivedAt: null,
   createdAt: "2026-01-15T10:00:00.000Z",
   updatedAt: "2026-01-15T10:00:00.000Z",
 };
-const CREATE_BODY = { name: "Universidad Ficticia", slug: "u-ficticia", contactEmail: "bienestar@ficticia.test" };
+const CREATE_BODY = { name: "Universidad Ficticia", contactEmail: "bienestar@ficticia.test" };
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -131,14 +129,14 @@ describe("POST /api/admin/institutions", () => {
     expect(createInstitution).not.toHaveBeenCalled();
   });
 
-  it("returns 409 when the slug is taken", async () => {
-    createInstitution.mockRejectedValue(new ConflictError(INSTITUTION_ERROR_MESSAGES.slugTaken));
+  it("returns 409 when the service raises a conflict", async () => {
+    createInstitution.mockRejectedValue(new ConflictError("A record with those values already exists."));
 
     const response = await POST(
       RouteTestSupport.request("/api/admin/institutions", { method: "POST", body: CREATE_BODY }),
     );
 
     expect(response.status).toBe(409);
-    expect(await response.json()).toEqual({ ok: false, error: INSTITUTION_ERROR_MESSAGES.slugTaken });
+    expect(await response.json()).toEqual({ ok: false, error: "A record with those values already exists." });
   });
 });

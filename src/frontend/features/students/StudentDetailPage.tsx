@@ -37,7 +37,7 @@ function StudentDetails({ student, institution }: StudentWithInstitution) {
         {
           term: "Institution",
           detail: (
-            <Link href={AdminRoutes.institution(institution.id)} className="text-teal-800 hover:underline">
+            <Link href={AdminRoutes.institution(institution.id)} className="text-sky-800 hover:underline">
               {institution.name}
             </Link>
           ),
@@ -79,7 +79,7 @@ export function StudentDetailPage({ studentId }: { studentId: string }) {
   return (
     <>
       <div>
-        <Link href={AdminRoutes.institution(institution.id)} className="text-sm text-teal-800 hover:underline">
+        <Link href={AdminRoutes.institution(institution.id)} className="text-sm text-sky-800 hover:underline">
           ← {institution.name}
         </Link>
         <div className="mt-2 flex items-center gap-3">

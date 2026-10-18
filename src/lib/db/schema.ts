@@ -33,7 +33,6 @@ export const institutions = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
-    slug: text("slug").notNull().unique(),
     contactEmail: text("contact_email").notNull(),
     status: institutionStatus("status").notNull().default("active"),
     archivedAt: timestamp("archived_at", { withTimezone: true }),

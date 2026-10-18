@@ -34,7 +34,6 @@ describe("GET /api/admin/institutions", () => {
     it("returns paginated institutions with student counts from the database", async () => {
       const older = await InstitutionFactory.create({
         name: "Universidad Norte Integración",
-        slug: "int-norte",
         contactEmail: "norte@integration.test",
       });
       await StudentFactory.create({
@@ -51,15 +50,13 @@ describe("GET /api/admin/institutions", () => {
         email: "bruno.dos@integration.test",
         documentId: "9000000002",
       });
-      await InstitutionFactory.create({
+      const archived = await InstitutionFactory.create({
         name: "Colegio Archivado",
-        slug: "int-archivado",
         contactEmail: "archivo@integration.test",
         status: "archived",
       });
       const newer = await InstitutionFactory.create({
         name: "Instituto Sur",
-        slug: "int-sur",
         contactEmail: "sur@integration.test",
       });
 
@@ -73,17 +70,18 @@ describe("GET /api/admin/institutions", () => {
         data: [
           expect.objectContaining({
             id: newer.id,
-            slug: "int-sur",
+            name: "Instituto Sur",
             studentCount: 0,
           }),
           expect.objectContaining({
-            slug: "int-archivado",
+            id: archived.id,
+            name: "Colegio Archivado",
             status: "archived",
             studentCount: 0,
           }),
           expect.objectContaining({
             id: older.id,
-            slug: "int-norte",
+            name: "Universidad Norte Integración",
             studentCount: 2,
           }),
         ],
@@ -93,27 +91,25 @@ describe("GET /api/admin/institutions", () => {
     it("filters the list by status and search query parameters", async () => {
       const norte = await InstitutionFactory.create({
         name: "Universidad Norte Integración",
-        slug: "int-norte",
-        contactEmail: "norte@integration.test",
+        contactEmail: "norte-filter@integration.test",
       });
       await StudentFactory.create({
         institutionId: norte.id,
         firstName: "Ana",
         lastName: "Uno",
-        email: "ana.uno@integration.test",
+        email: "ana.uno.filter@integration.test",
         documentId: "9000000001",
       });
       await StudentFactory.create({
         institutionId: norte.id,
         firstName: "Bruno",
         lastName: "Dos",
-        email: "bruno.dos@integration.test",
+        email: "bruno.dos.filter@integration.test",
         documentId: "9000000002",
       });
       await InstitutionFactory.create({
         name: "Instituto Sur",
-        slug: "int-sur",
-        contactEmail: "sur@integration.test",
+        contactEmail: "sur-filter@integration.test",
       });
 
       const response = await GET(
@@ -128,7 +124,7 @@ describe("GET /api/admin/institutions", () => {
         data: [
           expect.objectContaining({
             id: norte.id,
-            slug: "int-norte",
+            name: "Universidad Norte Integración",
             status: "active",
             studentCount: 2,
           }),
@@ -148,7 +144,7 @@ describe("POST /api/admin/institutions", () => {
       const response = await POST(
         IntegrationRoute.request("/api/admin/institutions", {
           method: "POST",
-          body: { name: "Nueva", slug: "nueva-int", contactEmail: "nueva@integration.test" },
+          body: { name: "Nueva", contactEmail: "nueva@integration.test" },
         }),
       );
 
@@ -168,7 +164,6 @@ describe("POST /api/admin/institutions", () => {
     it("creates the institution in the database and returns 201", async () => {
       const body = {
         name: "Universidad Creada",
-        slug: "u-creada-int",
         contactEmail: "  Creada@Integration.TEST ",
       };
 
@@ -177,7 +172,10 @@ describe("POST /api/admin/institutions", () => {
       );
       const json = await response.json();
 
-      const [row] = await Database.get().select().from(institutions).where(eq(institutions.slug, "u-creada-int"));
+      const [row] = await Database.get()
+        .select()
+        .from(institutions)
+        .where(eq(institutions.contactEmail, "creada@integration.test"));
 
       expect(response.status).toBe(201);
       expect(json).toEqual({
@@ -185,7 +183,6 @@ describe("POST /api/admin/institutions", () => {
         data: expect.objectContaining({
           id: row?.id,
           name: "Universidad Creada",
-          slug: "u-creada-int",
           contactEmail: "creada@integration.test",
           status: "active",
           archivedAt: null,
@@ -193,25 +190,9 @@ describe("POST /api/admin/institutions", () => {
       });
       expect(row).toMatchObject({
         name: "Universidad Creada",
-        slug: "u-creada-int",
         contactEmail: "creada@integration.test",
         status: "active",
       });
-    });
-
-    it("returns 409 when the slug is already taken", async () => {
-      await InstitutionFactory.create({ slug: "slug-ocupado", name: "Primera", contactEmail: "a@integration.test" });
-
-      const response = await POST(
-        IntegrationRoute.request("/api/admin/institutions", {
-          method: "POST",
-          cookie,
-          body: { name: "Segunda", slug: "slug-ocupado", contactEmail: "b@integration.test" },
-        }),
-      );
-
-      expect(response.status).toBe(409);
-      expect(await response.json()).toMatchObject({ ok: false });
     });
   });
 });

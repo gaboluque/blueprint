@@ -14,7 +14,7 @@ describe("GET /api/admin/institutions/[id]", () => {
     });
 
     it("returns 401 when the session cookie is missing", async () => {
-      const institution = await InstitutionFactory.create({ slug: "get-int" });
+      const institution = await InstitutionFactory.create();
       const context = IntegrationRoute.routeContext({ id: institution.id });
 
       const response = await GET(IntegrationRoute.request(`/api/admin/institutions/${institution.id}`), context);
@@ -35,7 +35,6 @@ describe("GET /api/admin/institutions/[id]", () => {
     it("returns the institution stored in the database", async () => {
       const institution = await InstitutionFactory.create({
         name: "Detalle Integración",
-        slug: "detalle-int",
         contactEmail: "detalle@integration.test",
       });
       const context = IntegrationRoute.routeContext({ id: institution.id });
@@ -52,7 +51,6 @@ describe("GET /api/admin/institutions/[id]", () => {
         data: expect.objectContaining({
           id: institution.id,
           name: "Detalle Integración",
-          slug: "detalle-int",
           contactEmail: "detalle@integration.test",
           status: "active",
         }),
@@ -81,14 +79,14 @@ describe("PATCH /api/admin/institutions/[id]", () => {
   });
 
   it("persists the patch and returns the updated institution", async () => {
-    const institution = await InstitutionFactory.create({ slug: "patch-int", name: "Antes" });
+    const institution = await InstitutionFactory.create({ name: "Antes", contactEmail: "patch@integration.test" });
     const context = IntegrationRoute.routeContext({ id: institution.id });
 
     const response = await PATCH(
       IntegrationRoute.request(`/api/admin/institutions/${institution.id}`, {
         method: "PATCH",
         cookie,
-        body: { name: " Después ", slug: "PATCH-INT" },
+        body: { name: " Después ", contactEmail: " despues@integration.test " },
       }),
       context,
     );
@@ -97,13 +95,12 @@ describe("PATCH /api/admin/institutions/[id]", () => {
     const [row] = await Database.get().select().from(institutions).where(eq(institutions.id, institution.id));
 
     expect(response.status).toBe(200);
-    expect(json.data).toMatchObject({ name: "Después", slug: "patch-int" });
-    expect(row).toMatchObject({ name: "Después", slug: "patch-int" });
+    expect(json.data).toMatchObject({ name: "Después", contactEmail: "despues@integration.test" });
+    expect(row).toMatchObject({ name: "Después", contactEmail: "despues@integration.test" });
   });
 
   it("returns 409 when the institution is archived", async () => {
     const institution = await InstitutionFactory.create({
-      slug: "archived-patch-int",
       status: "archived",
     });
     const context = IntegrationRoute.routeContext({ id: institution.id });
@@ -131,7 +128,7 @@ describe("DELETE /api/admin/institutions/[id]", () => {
   });
 
   it("archives the institution in the database", async () => {
-    const institution = await InstitutionFactory.create({ slug: "archive-int" });
+    const institution = await InstitutionFactory.create();
     const context = IntegrationRoute.routeContext({ id: institution.id });
 
     const response = await DELETE(
@@ -149,7 +146,7 @@ describe("DELETE /api/admin/institutions/[id]", () => {
   });
 
   it("returns 409 when the institution is already archived", async () => {
-    const institution = await InstitutionFactory.create({ slug: "already-archived-int", status: "archived" });
+    const institution = await InstitutionFactory.create({ status: "archived" });
     const context = IntegrationRoute.routeContext({ id: institution.id });
 
     const response = await DELETE(

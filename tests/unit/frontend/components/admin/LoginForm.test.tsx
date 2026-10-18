@@ -43,7 +43,17 @@ describe("LoginForm", () => {
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
-  it("shows field errors next to the matching input", async () => {
+  it("validates email on the client before calling the API", async () => {
+    render(<LoginForm />);
+
+    await submit("no-es-correo", "x");
+
+    expect(signIn).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Email")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("Password")).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("shows server field errors next to the matching input", async () => {
     signIn.mockResolvedValue({
       ok: false,
       status: 400,
@@ -52,9 +62,10 @@ describe("LoginForm", () => {
     });
     render(<LoginForm />);
 
-    await submit("no-es-correo", "x");
+    await submit("user@example.com", "secret");
 
     const email = screen.getByLabelText("Email");
+    expect(signIn).toHaveBeenCalledWith({ email: "user@example.com", password: "secret" });
     expect(email).toHaveAttribute("aria-invalid", "true");
     expect(email).toHaveAccessibleDescription("Invalid email address");
     expect(screen.getByLabelText("Password")).not.toHaveAttribute("aria-invalid");

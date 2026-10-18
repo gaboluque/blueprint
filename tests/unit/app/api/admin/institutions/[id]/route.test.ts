@@ -52,7 +52,6 @@ describe("GET /api/admin/institutions/[id]", () => {
       data: {
         id: INSTITUTION_ID,
         name: "Universidad Ficticia",
-        slug: "u-ficticia",
         contactEmail: "bienestar@ficticia.test",
         status: "active",
         archivedAt: null,
@@ -100,7 +99,10 @@ describe("PATCH /api/admin/institutions/[id]", () => {
     updateInstitution.mockResolvedValue(buildInstitution({ name: "Nueva" }));
 
     const response = await PATCH(
-      RouteTestSupport.request(PATH, { method: "PATCH", body: { name: " Nueva ", slug: "U-Nueva" } }),
+      RouteTestSupport.request(PATH, {
+        method: "PATCH",
+        body: { name: " Nueva ", contactEmail: " Nuevo@Ficticia.TEST " },
+      }),
       CONTEXT,
     );
 
@@ -109,7 +111,7 @@ describe("PATCH /api/admin/institutions/[id]", () => {
     expect(mockDb.transaction).toHaveBeenCalledTimes(1);
     expect(updateInstitution).toHaveBeenCalledWith(expect.anything(), buildAdminActor(), {
       id: INSTITUTION_ID,
-      patch: { name: "Nueva", slug: "u-nueva" },
+      patch: { name: "Nueva", contactEmail: "nuevo@ficticia.test" },
     });
   });
 

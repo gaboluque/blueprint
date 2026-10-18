@@ -1,21 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminInstitutions } from "@/frontend/gateway/institutions";
 import {
-  listInstitutionsQuerySchema,
   type ListInstitutionsQuery,
+  listInstitutionsQuerySchema,
 } from "@/domains/institutions/validations/institution.validation";
 import type { InstitutionListItemDto } from "@/domains/institutions/views/institution.view";
 import { AdminRoutes } from "@/frontend/components/admin/adminRoutes";
 import { INSTITUTION_STATUS_LABELS, InstitutionStatusBadge } from "@/frontend/components/admin/statusLabels";
 import { useListQuery } from "@/frontend/hooks/useListQuery";
-import { DataTable, type DataTableColumn } from "@/frontend/components/shared/DataTable";
+import { type TableColumn, Table } from "@/frontend/components/shared/Table";
 import { ListFilters } from "@/frontend/components/shared/ListFilters";
 import { ListShell } from "@/frontend/components/shared/ListShell";
-import { recordToOptions, type FilterField } from "@/frontend/components/shared/listTypes";
+import { type FilterField, recordToOptions } from "@/frontend/components/shared/listTypes";
 import { Pagination } from "@/frontend/components/shared/Pagination";
 import { formatDate } from "@/lib/date";
 import { Button } from "@/frontend/components/ui/Button";
@@ -26,7 +25,7 @@ import { InstitutionForm } from "./InstitutionForm";
 const INITIAL_QUERY: ListInstitutionsQuery = { page: 1, pageSize: DEFAULT_PAGE_SIZE, search: undefined };
 
 const FILTER_FIELDS: FilterField<ListInstitutionsQuery>[] = [
-  { type: "search", name: "search", label: "Search by name or slug" },
+  { type: "search", name: "search", label: "Search by name" },
   {
     type: "select",
     name: "status",
@@ -36,17 +35,12 @@ const FILTER_FIELDS: FilterField<ListInstitutionsQuery>[] = [
   },
 ];
 
-const COLUMNS: DataTableColumn<InstitutionListItemDto>[] = [
+const COLUMNS: TableColumn<InstitutionListItemDto>[] = [
   {
     key: "name",
     header: "Name",
-    cell: (institution) => (
-      <Link href={AdminRoutes.institution(institution.id)} className="font-medium text-teal-800 hover:underline">
-        {institution.name}
-      </Link>
-    ),
+    cell: (institution) => institution.name,
   },
-  { key: "slug", header: "Slug", cell: (institution) => institution.slug },
   { key: "contactEmail", header: "Contact email", cell: (institution) => institution.contactEmail },
   { key: "studentCount", header: "Students", align: "right", cell: (institution) => institution.studentCount },
   { key: "status", header: "Status", cell: (institution) => <InstitutionStatusBadge status={institution.status} /> },
@@ -87,7 +81,12 @@ export function InstitutionsListPage() {
           isEmpty={list.data.length === 0}
           emptyMessage="No institutions match the filters."
         >
-          <DataTable caption="Institutions" columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
+          <Table
+            columns={COLUMNS}
+            rows={list.data}
+            rowKey={(row) => row.id}
+            onRowClick={(row) => router.push(AdminRoutes.institution(row.id))}
+          />
           <Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />
         </ListShell>
       </Card>

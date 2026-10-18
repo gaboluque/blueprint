@@ -26,7 +26,7 @@ describe("POST /api/admin/sessions", () => {
   });
 
   it("returns 401 for institution staff even when credentials are valid", async () => {
-    const institution = await InstitutionFactory.create({ slug: "staff-session-int" });
+    const institution = await InstitutionFactory.create();
     const staff = await UserFactory.create({
       email: "staff.session@integration.test",
       password: "StaffSession123!",

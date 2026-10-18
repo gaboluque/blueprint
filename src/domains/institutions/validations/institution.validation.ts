@@ -3,16 +3,6 @@ import { institutionStatus } from "@/lib/db/schema";
 import { paginationQuerySchema } from "@/lib/pagination";
 import { emailSchema, requiredText, searchSchema } from "@/lib/validation/schemas";
 
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-const slugSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .min(2)
-  .max(64)
-  .regex(SLUG_PATTERN, { error: "Use lowercase letters, numbers, and hyphens only." });
-
 /** `GET /api/admin/institutions`. Omitted `status` = all statuses. */
 export const listInstitutionsQuerySchema = paginationQuerySchema.extend({
   search: searchSchema,
@@ -22,7 +12,6 @@ export const listInstitutionsQuerySchema = paginationQuerySchema.extend({
 /** `POST /api/admin/institutions`. Unknown keys (e.g. `status`, `archivedAt`) are rejected. */
 export const createInstitutionBodySchema = z.strictObject({
   name: requiredText(200),
-  slug: slugSchema,
   contactEmail: emailSchema,
 });
 

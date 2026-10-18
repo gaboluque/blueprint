@@ -45,7 +45,7 @@ src/
       ui/                         Radix primitives (Button, Alert, Card, …)
       shared/                     cross-domain widgets (ListShell, DataTable, Pagination, …)
       admin/                      admin chrome (AdminShell, adminRoutes, statusLabels)
-    hooks/                        useListQuery, useResource, useMutation, …
+    hooks/                        useForm, useListQuery, useResource, useMutation, …
     gateway/                      apiClient.ts + <domain>.ts fetch wrappers → ApiResult<T>
   domains/<domain>/               backend domain logic, one folder per domain
     <x>.model.ts  <x>s.repo.ts  <x>.policy.ts  <x>.errors.ts
@@ -122,7 +122,7 @@ export const UpdateInstitution = { call };
 
 ## Testing
 
-Full guide: [`_docs/tests.md`](_docs/tests.md).
+Full guide: [`_docs/tests.md`](_docs/tests.md). Admin forms: [`_docs/useForm.md`](_docs/useForm.md).
 
 Every test uses **Arrange–Act–Assert** with a **blank line** between each block (no section comments). One behavior per `it`; names state what is asserted.
 

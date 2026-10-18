@@ -27,7 +27,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 | 401    | Not signed in, session expired, wrong credentials        |
 | 403    | Policy denied (unreachable while admin is the only role) |
 | 404    | Resource doesn't exist                                   |
-| 409    | Unique conflict (slug, email) or archived institution    |
+| 409    | Unique conflict (email) or archived institution          |
 | 415    | Body isn't JSON                                          |
 | 500    | Unexpected; message is the route's `fallbackError`       |
 
@@ -41,13 +41,13 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 
 ## Institutions
 
-| Method | Path                           | Query / body                                                                                                  | Success                                                                                | Errors                                     |
-| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------ |
-| GET    | `/api/admin/institutions`      | `listInstitutionsQuerySchema`: `page`, `pageSize`, `search` (name or slug), `status` (`active` \| `archived`) | `200` `InstitutionListItemDto[]` + `pagination`, newest first                          | `400`                                      |
-| POST   | `/api/admin/institutions`      | `createInstitutionBodySchema`: `{ name, slug, contactEmail }`                                                 | `201` `InstitutionDto` (`status: "active"`)                                            | `400`, `409` slug taken                    |
-| GET    | `/api/admin/institutions/[id]` | —                                                                                                             | `200` `InstitutionDto` (archived ones too)                                             | `400`, `404`                               |
-| PATCH  | `/api/admin/institutions/[id]` | `updateInstitutionBodySchema`: any of `name`, `slug`, `contactEmail` (at least one)                           | `200` `InstitutionDto`                                                                 | `400`, `404`, `409` archived or slug taken |
-| DELETE | `/api/admin/institutions/[id]` | —                                                                                                             | `200` `InstitutionDto` with `status: "archived"`, `archivedAt` set. Students are kept. | `404`, `409` already archived              |
+| Method | Path                           | Query / body                                                                                          | Success                                                                                | Errors                        |
+| ------ | ------------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------- |
+| GET    | `/api/admin/institutions`      | `listInstitutionsQuerySchema`: `page`, `pageSize`, `search` (name), `status` (`active` \| `archived`) | `200` `InstitutionListItemDto[]` + `pagination`, newest first                          | `400`                         |
+| POST   | `/api/admin/institutions`      | `createInstitutionBodySchema`: `{ name, contactEmail }`                                               | `201` `InstitutionDto` (`status: "active"`)                                            | `400`                         |
+| GET    | `/api/admin/institutions/[id]` | —                                                                                                     | `200` `InstitutionDto` (archived ones too)                                             | `400`, `404`                  |
+| PATCH  | `/api/admin/institutions/[id]` | `updateInstitutionBodySchema`: any of `name`, `contactEmail` (at least one)                           | `200` `InstitutionDto`                                                                 | `400`, `404`, `409` archived  |
+| DELETE | `/api/admin/institutions/[id]` | —                                                                                                     | `200` `InstitutionDto` with `status: "archived"`, `archivedAt` set. Students are kept. | `404`, `409` already archived |
 
 `status` and `archivedAt` are never accepted in bodies; archiving only happens through `DELETE`. There is no hard delete and no unarchive yet.
 
@@ -68,7 +68,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 | Endpoint           | Service (`src/domains/<domain>/services/`)              | Repo calls                                                                                     | Policy                        | Model rule                                             |
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------ |
 | GET institutions   | `listInstitutions.service.ts` → `ListInstitutions.call` | `institutions.listWithStudentCounts`                                                           | `canList`                     | —                                                      |
-| POST institutions  | `createInstitution.service.ts`                          | `institutions.create` (unique slug → `409`)                                                    | `canCreate`                   | —                                                      |
+| POST institutions  | `createInstitution.service.ts`                          | `institutions.create`                                                                          | `canCreate`                   | —                                                      |
 | GET institution    | `getInstitution.service.ts`                             | `institutions.findById`                                                                        | `canRead`                     | —                                                      |
 | PATCH institution  | `updateInstitution.service.ts`                          | `findById`, `update`                                                                           | `canUpdate`                   | `assertEditable()`                                     |
 | DELETE institution | `archiveInstitution.service.ts`                         | `findById`, `update(id, institution.archive(new Date()))`                                      | `canArchive`                  | `archive(now)`                                         |

@@ -1,11 +1,10 @@
-import { INSTITUTION_ERROR_MESSAGES } from "@/domains/institutions/institution.errors";
 import { InstitutionPolicy } from "@/domains/institutions/institution.policy";
 import { CreateInstitution } from "@/domains/institutions/services/createInstitution.service";
 import type { AppRepos } from "@/lib/db/repoRegistry";
 import { ConflictError, ForbiddenError } from "@/lib/errors/domain.errors";
 import { buildAdminActor, buildInstitution } from "../../../../factories/models";
 
-const INPUT = { name: "Universidad Ficticia", slug: "u-ficticia", contactEmail: "bienestar@ficticia.test" };
+const INPUT = { name: "Universidad Ficticia", contactEmail: "bienestar@ficticia.test" };
 
 function setup() {
   const create = jest.fn();
@@ -27,13 +26,13 @@ describe("CreateInstitution", () => {
     expect(result).toBe(institution);
   });
 
-  it("propagates the slug conflict from the repo", async () => {
+  it("propagates a conflict from the repo", async () => {
     const { repos, create } = setup();
-    create.mockRejectedValue(new ConflictError(INSTITUTION_ERROR_MESSAGES.slugTaken));
+    create.mockRejectedValue(new ConflictError("A record with those values already exists."));
 
     const act = CreateInstitution.call(repos, buildAdminActor(), INPUT);
 
-    await expect(act).rejects.toThrow(INSTITUTION_ERROR_MESSAGES.slugTaken);
+    await expect(act).rejects.toThrow("A record with those values already exists.");
   });
 
   it("rejects a caller the policy denies without writing", async () => {

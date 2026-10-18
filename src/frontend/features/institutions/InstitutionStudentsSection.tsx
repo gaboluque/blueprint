@@ -13,7 +13,7 @@ import { AdminRoutes } from "@/frontend/components/admin/adminRoutes";
 import { STUDENT_STATUS_LABELS, StudentStatusBadge } from "@/frontend/components/admin/statusLabels";
 import { StudentForm } from "@/frontend/features/students/StudentForm";
 import { useListQuery } from "@/frontend/hooks/useListQuery";
-import { DataTable, type DataTableColumn } from "@/frontend/components/shared/DataTable";
+import { Table, type TableColumn } from "@/frontend/components/shared/Table";
 import { ListFilters } from "@/frontend/components/shared/ListFilters";
 import { ListShell } from "@/frontend/components/shared/ListShell";
 import { recordToOptions, type FilterField } from "@/frontend/components/shared/listTypes";
@@ -35,12 +35,12 @@ const FILTER_FIELDS: FilterField<ListStudentsQuery>[] = [
   },
 ];
 
-const COLUMNS: DataTableColumn<StudentDto>[] = [
+const COLUMNS: TableColumn<StudentDto>[] = [
   {
     key: "fullName",
     header: "Name",
     cell: (student) => (
-      <Link href={AdminRoutes.student(student.id)} className="font-medium text-teal-800 hover:underline">
+      <Link href={AdminRoutes.student(student.id)} className="font-medium text-sky-800 hover:underline">
         {student.fullName}
       </Link>
     ),
@@ -99,7 +99,7 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
         isEmpty={list.data.length === 0}
         emptyMessage="No students match the filters."
       >
-        <DataTable caption="Students at this institution" columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
+        <Table columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
         <Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />
       </ListShell>
     </Card>

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type DataTableColumn<T> = {
+export type TableColumn<T> = {
   key: string;
   header: string;
   cell: (row: T) => ReactNode;
@@ -8,17 +8,22 @@ export type DataTableColumn<T> = {
 };
 
 type DataTableProps<T> = {
-  caption: string;
-  columns: DataTableColumn<T>[];
+  columns: TableColumn<T>[];
   rows: T[];
   rowKey: (row: T) => string;
+  onRowClick?: (row: T) => void;
 };
 
-export function DataTable<T>({ caption, columns, rows, rowKey }: DataTableProps<T>) {
+export function Table<T>({ columns, rows, rowKey, onRowClick }: DataTableProps<T>) {
+  const handleRowClick = (row: T) => {
+    if (onRowClick) {
+      onRowClick(row);
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-200 text-sm">
-        <caption className="sr-only">{caption}</caption>
         <thead>
           <tr>
             {columns.map((column) => (
@@ -34,7 +39,11 @@ export function DataTable<T>({ caption, columns, rows, rowKey }: DataTableProps<
         </thead>
         <tbody className="divide-y divide-slate-100">
           {rows.map((row) => (
-            <tr key={rowKey(row)} className="hover:bg-slate-50">
+            <tr
+              key={rowKey(row)}
+              className={`hover:bg-slate-50 ${onRowClick ? "cursor-pointer" : ""}`}
+              onClick={() => handleRowClick(row)}
+            >
               {columns.map((column) => (
                 <td key={column.key} className={`px-3 py-2 ${column.align === "right" ? "text-right" : "text-left"}`}>
                   {column.cell(row)}

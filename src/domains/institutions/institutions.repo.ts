@@ -1,13 +1,12 @@
-import { and, eq, getTableColumns, ilike, or, sql, type SQL } from "drizzle-orm";
+import { and, eq, getTableColumns, ilike, sql, type SQL } from "drizzle-orm";
 import { BaseRepo, type Row } from "@/lib/db/baseRepo";
 import { institutions, students, type InstitutionStatus } from "@/lib/db/schema";
 import { SqlHelpers } from "@/lib/db/sqlHelpers";
 import { Pagination, type PaginationQuery, type PaginationResult } from "@/lib/pagination";
-import { INSTITUTION_ERROR_MESSAGES } from "./institution.errors";
 import { Institution } from "./institution.model";
 
 export type InstitutionListFilters = {
-  /** Matches name or slug, case-insensitive. */
+  /** Matches name, case-insensitive. */
   search?: string;
   status?: InstitutionStatus;
 };
@@ -19,7 +18,6 @@ export type InstitutionWithStudentCount = {
 
 export class InstitutionsRepo extends BaseRepo<typeof institutions, Institution> {
   protected readonly table = institutions;
-  protected override readonly conflictMessage = INSTITUTION_ERROR_MESSAGES.slugTaken;
 
   protected toModel(row: Row<typeof institutions>): Institution {
     return new Institution(row);
@@ -27,10 +25,6 @@ export class InstitutionsRepo extends BaseRepo<typeof institutions, Institution>
 
   protected override institutionIdOf(row: Row<typeof institutions>): string {
     return row.id;
-  }
-
-  findBySlug(slug: string): Promise<Institution | null> {
-    return this.findBy({ slug });
   }
 
   /** Newest first, each with its total student count (all statuses). */
@@ -71,7 +65,7 @@ export class InstitutionsRepo extends BaseRepo<typeof institutions, Institution>
     const conditions: (SQL | undefined)[] = [status ? eq(institutions.status, status) : undefined];
     if (search) {
       const pattern = SqlHelpers.containsPattern(search);
-      conditions.push(or(ilike(institutions.name, pattern), ilike(institutions.slug, pattern)));
+      conditions.push(ilike(institutions.name, pattern));
     }
     return and(...conditions);
   }

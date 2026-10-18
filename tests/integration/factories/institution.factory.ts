@@ -4,9 +4,7 @@ import { institutions } from "@/lib/db/schema";
 import { buildArchivedInstitution, buildInstitution } from "@tests/factories/models";
 import { IntegrationSequence } from "@tests/integration/factories/sequence";
 
-type CreateInstitutionInput = Partial<
-  Pick<InstitutionProps, "name" | "slug" | "contactEmail" | "status" | "archivedAt">
->;
+type CreateInstitutionInput = Partial<Pick<InstitutionProps, "name" | "contactEmail" | "status" | "archivedAt">>;
 
 function insertValues(overrides: CreateInstitutionInput): typeof institutions.$inferInsert {
   const seq = IntegrationSequence.next();
@@ -14,8 +12,7 @@ function insertValues(overrides: CreateInstitutionInput): typeof institutions.$i
 
   const status = overrides.status ?? sample.status;
   return {
-    name: overrides.name ?? sample.name,
-    slug: overrides.slug ?? `${sample.slug}-${seq}`,
+    name: overrides.name ?? `${sample.name} ${seq}`,
     contactEmail: overrides.contactEmail ?? `inst-${seq}@integration.test`,
     status,
     archivedAt: status === "archived" ? (overrides.archivedAt ?? sample.archivedAt ?? new Date()) : null,

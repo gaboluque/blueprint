@@ -15,7 +15,7 @@ describe("GET /api/admin/institutions/[id]/students", () => {
     });
 
     it("returns 401 when the session cookie is missing", async () => {
-      const institution = await InstitutionFactory.create({ slug: "students-list-int" });
+      const institution = await InstitutionFactory.create();
       const context = IntegrationRoute.routeContext({ id: institution.id });
 
       const response = await GET(
@@ -37,7 +37,7 @@ describe("GET /api/admin/institutions/[id]/students", () => {
     });
 
     it("returns students belonging to the institution from the database", async () => {
-      const institution = await InstitutionFactory.create({ slug: "students-list-int" });
+      const institution = await InstitutionFactory.create();
       const active = await StudentFactory.create({
         institutionId: institution.id,
         firstName: "Ana",
@@ -101,7 +101,7 @@ describe("POST /api/admin/institutions/[id]/students", () => {
   });
 
   it("creates the student in the database and returns 201", async () => {
-    const institution = await InstitutionFactory.create({ slug: "students-create-int" });
+    const institution = await InstitutionFactory.create();
     const context = IntegrationRoute.routeContext({ id: institution.id });
     const body = {
       firstName: "Carla",
@@ -143,7 +143,7 @@ describe("POST /api/admin/institutions/[id]/students", () => {
   });
 
   it("returns 409 when the institution is archived", async () => {
-    const institution = await InstitutionFactory.create({ slug: "students-archived-int", status: "archived" });
+    const institution = await InstitutionFactory.create({ status: "archived" });
     const context = IntegrationRoute.routeContext({ id: institution.id });
 
     const response = await POST(
