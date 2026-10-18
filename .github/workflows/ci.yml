@@ -59,6 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgres://blueprint:blueprint@localhost:5432/blueprint
+      INTEGRATION_DATABASE_URL: postgres://blueprint:blueprint@localhost:5432/blueprint_test
       SESSION_SECRET: ci-session-secret-that-is-long-enough-for-validation
       NODE_ENV: test
     services:
@@ -82,7 +83,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run db:migrate
       - run: npm test
 
   build:
