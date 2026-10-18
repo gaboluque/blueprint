@@ -46,7 +46,8 @@ describe("InstitutionsListPage", () => {
     expect(within(norteRow as HTMLElement).getByRole("cell", { name: "3" })).toBeInTheDocument();
     expect(within(norteRow as HTMLElement).getByText("Active")).toBeInTheDocument();
     expect(within(surRow as HTMLElement).getByText("Archived")).toBeInTheDocument();
-    expect(screen.getByText(/Page 1 of 1 · 2 results/)).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Pagination" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Page 1, current page" })).toBeInTheDocument();
   });
 
   it("refetches from page 1 when the status filter changes", async () => {
