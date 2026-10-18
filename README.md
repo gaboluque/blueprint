@@ -1,33 +1,66 @@
 # blueprint
 
-Admin panel for institutions and their students. Next.js (App Router) · TypeScript strict · Postgres in Docker · Drizzle ORM · Zod · Jest.
+Starter template for fullstack Next.js apps: typed API routes, Postgres, and a browser UI that never talks to the database directly. Clone it, rename it, and grow your own domains on the same skeleton.
 
-Engineering rules for humans and agents: [`AGENTS.md`](AGENTS.md). API contract: [`_docs/api-contracts.md`](_docs/api-contracts.md). New domain checklist: [`_docs/new-domain.md`](_docs/new-domain.md). Testing: [`_docs/tests.md`](_docs/tests.md).
+**Stack:** Next.js App Router · TypeScript strict · Postgres · Drizzle ORM · Zod · Jest
+
+**Sample app:** an admin panel for institutions and students. It is reference code, not the product—you can replace or extend it while keeping the patterns.
+
+## What you get
+
+| Area                 | What blueprint gives you                                                                             |
+|----------------------|------------------------------------------------------------------------------------------------------|
+| **Request flow**     | `page → gateway → API handler → service → repo → Postgres`, with auth and validation at the edge     |
+| **Layers**           | `domains/` (models, repos, policies, services), `frontend/` (features + gateway), thin `app/` routes |
+| **HTTP**             | `AdminApiHandler` — session auth, Zod, `{ ok, data \| error }` envelope, mapped domain errors        |
+| **Data**             | Plain Postgres (no Supabase/RLS); code-side policies; migrations from `schema.ts`                    |
+| **Auth**             | `AuthProvider` port + dev bcrypt/JWT cookie; swap the adapter without touching routes                |
+| **Quality**          | Unit + integration tests, CI workflow, `make lint` / `typecheck` / `test` / `check`                  |
+| **AI-friendly docs** | [`AGENTS.md`](AGENTS.md) and `_docs/` for agents and humans                                          |
+
+Canonical implementation to copy when you add features: `src/domains/institutions/`.
+
+## Documentation
+
+| Doc                                                | Purpose                                                      |
+|----------------------------------------------------|--------------------------------------------------------------|
+| [`AGENTS.md`](AGENTS.md)                           | Golden rules, templates, layout (source of truth for agents) |
+| [`_docs/api-contracts.md`](_docs/api-contracts.md) | Sample admin API (envelope, status codes, DTOs)              |
+| [`_docs/new-domain.md`](_docs/new-domain.md)       | Checklist for a new domain or endpoint slice                 |
+| [`_docs/tests.md`](_docs/tests.md)                 | Arrange–Act–Assert, unit vs integration, factories           |
 
 ## Requirements
 
-- Node.js 22+ and npm
-- Docker (for Postgres)
+- Node.js 22+ and npm (see `.nvmrc`)
+- Docker (Postgres for local dev and integration tests)
 
 ## Get started
 
 ```bash
-make setup        # copies .env.example → .env, installs dependencies
+make setup        # .env.example → .env, npm install
 make db-up        # Postgres on localhost:5434
-make db-migrate   # applies migrations/
-make seed         # fake admin, 2 institutions, 5 students (idempotent)
+make db-migrate   # apply db/migrations/
+make seed         # fake admin, institutions, students (idempotent)
 npm run dev       # http://localhost:3001
 ```
 
-`make start` runs `db-up`, `db-migrate`, and the dev server in one step. Before you share the environment, replace `SESSION_SECRET` in `.env` with the output of `openssl rand -base64 48`.
+Or `make start` (Postgres + migrate + dev server).
 
-### Dev credentials
+Before you deploy or share an environment, set `SESSION_SECRET` in `.env` to a new value, for example:
+
+```bash
+openssl rand -base64 48
+```
+
+### Try the sample admin
+
+Open `http://localhost:3001/admin/login`.
 
 | Email                 | Password    |
 |-----------------------|-------------|
 | `admin@blueprint.dev` | `Admin123!` |
 
-Sign in from the terminal:
+Session API from the terminal:
 
 ```bash
 curl -i -c cookies.txt -H 'content-type: application/json' \
@@ -38,62 +71,55 @@ curl -b cookies.txt http://localhost:3001/api/admin/me
 
 ## Commands
 
-| Command                                      | Does                                                                                                   |
-|----------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| `make setup`                                 | Creates `.env` if missing and runs `npm install`                                                       |
-| `make start`                                 | Starts Postgres, migrates, and runs `next dev`                                                         |
-| `make db-up` / `make db-down`                | Starts or stops the Postgres container                                                                 |
-| `make db-generate NAME=…`                    | Generates a migration from `src/lib/db/schema.ts` (name required, snake_case, e.g. `add_audit_events`) |
-| `make db-migrate`                            | Applies pending migrations                                                                             |
-| `make seed`                                  | Inserts fake data (skips rows that already exist)                                                      |
-| `make lint` · `make typecheck` · `make test` | Quality gates (integration route tests need Postgres; `make db-up` or CI)                              |
-| `make check`                                 | Lint, typecheck, test, and production build (matches CI except migrations)                             |
-| `make build`                                 | `next build`                                                                                           |
+| Command                                      | Does                                                             |
+|----------------------------------------------|------------------------------------------------------------------|
+| `make setup`                                 | Create `.env` if missing, `npm install`                          |
+| `make start`                                 | Postgres, migrate, `next dev`                                    |
+| `make db-up` / `make db-down`                | Start or stop Postgres                                           |
+| `make db-generate NAME=…`                    | Migration from `src/lib/db/schema.ts` (snake_case name required) |
+| `make db-migrate`                            | Apply pending migrations                                         |
+| `make seed`                                  | Idempotent fake seed                                             |
+| `make lint` · `make typecheck` · `make test` | Quality gates (integration needs Postgres)                       |
+| `make check`                                 | Lint, typecheck, test, production build (like CI)                |
+| `make build`                                 | `next build`                                                     |
 
-Node **22+** (see `.nvmrc`). `npm ci` installs exact versions from the lockfile.
+Use `npm ci` in CI or clean installs.
 
-## Continuous integration
+## Using this as a template
 
-Every push and pull request to `main` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+1. **Fork or clone** and create your app repo.
+2. **Rename** the package and branding (`package.json`, UI copy, cookie name if you want isolation).
+3. **Keep the layers** — add tables in `schema.ts`, domains under `src/domains/`, gateway methods, routes, and UI following [`_docs/new-domain.md`](_docs/new-domain.md).
+4. **Trim or replace** the sample institutions/students slice when it no longer fits; keep one domain as the pattern reference until your own is stable.
+5. **Run** `make db-generate NAME=your_change` for every schema edit; review generated SQL before migrate.
 
-1. `npm ci`
-2. Postgres 17 (service container) → `npm run db:migrate`
-3. `npm run lint` · `npm run typecheck` · `npm test` · `npm run build`
+Frontend code must not import `@/lib/db/*`, repos, or Drizzle (ESLint enforces this). All browser data goes through `src/frontend/gateway/`.
 
-Fork the repo, enable Actions, and require this workflow to pass before merge. In GitHub: **Settings → Branches → Branch protection rules** → add a rule for `main` → enable **Require status checks to pass** → select the **CI** workflow (or the `quality` job name GitHub shows after the first run).
-
-Locally, with Postgres up and `.env` in place: `make db-migrate && make check`.
-
-## Architecture
+## Architecture (overview)
 
 ```
 src/
-  app/            pages and API routes (thin HTTP glue)
-  frontend/       everything that ships to the browser
-    features/       per-domain UI
-    components/     cross-domain UI (ui, shared, admin)
-    hooks/          reusable React hooks
-    gateway/        fetch wrappers returning ApiResult<T>
-  domains/        users, institutions, students: models, repos, policies, errors, services, validations, views
-  lib/            backend infra + cross-cutting utilities (auth, db, errors, http, policy, validation, observability, date, pagination)
-db/migrations/    SQL generated by drizzle-kit
-scripts/seed.ts   fake seed data
-tests/unit/           Jest unit tests mirroring src/
-tests/integration/    route tests against Postgres (`*.integration.test.ts`)
+  app/              Next.js pages and API routes (thin glue)
+  frontend/         UI, hooks, gateway (ApiResult<T>)
+  domains/          Per-domain models, repos, policies, services, validations, views
+  lib/              Auth, db, HTTP handlers, errors, validation, observability
+db/migrations/      drizzle-kit SQL
+tests/unit/         Mirrors src/
+tests/integration/  Route tests against Postgres (*.integration.test.ts)
 ```
 
-### Tests
+**Database.** Single schema in `src/lib/db/schema.ts`. Named migrations only (`make db-generate NAME=add_audit_events`). One cached `pg` pool for dev hot reload.
 
-See [`_docs/tests.md`](_docs/tests.md) (AAA, unit vs integration, factories, coverage). Postgres required for integration (`make db-up`). `make test` runs unit then integration `--runInBand`.
+**Repos and models.** `BaseRepo` + rich model classes; models do not hold a db handle. Authorization lives in `*.policy.ts` and runs in services (fail closed).
 
-```
+**Tests.** [`_docs/tests.md`](_docs/tests.md). Integration tests need `make db-up`; `make test` runs integration `--runInBand`.
 
-- **Database.** Plain Postgres, no Supabase and no RLS. `src/lib/db/schema.ts` is the only schema definition; drizzle-kit generates migrations from it. Always pass a declarative name: `make db-generate NAME=add_audit_events` (or `npm run db:generate -- add_audit_events`). Without a name, generation fails on purpose so files are not named with drizzle-kit’s random adjective\_hero slugs. One `pg` pool is cached on `globalThis` so dev hot reload doesn't leak connections.
-- **Repos and models.** Each table has a repo extending `BaseRepo`, which maps rows to rich model classes (`student.isEligible(institution)`, `institution.archive(now)`). Models never hold a db handle; relations are explicit methods that take repos, such as `institution.students(repos, { page, pageSize }, filters)`.
-- **Requests.** `AdminApiHandler` authenticates the session cookie, validates params/query/body with Zod, runs the handler, and maps domain errors to the `{ ok, data | error }` envelope.
-- **Authorization.** `.policy.ts` modules decide who may act, called from services. They fail closed.
-- **Institutions are archived, never deleted.** Their students are kept.
+**Auth.** Implement `AuthProvider` (`signIn`, `authenticate`) and wire it in `src/lib/auth/auth.ts`. The included dev adapter uses bcrypt + HS256 session cookie.
 
-### Auth is replaceable
+## Continuous integration
 
-`AuthProvider` (`src/lib/auth/auth.port.ts`) has two methods: `signIn` and `authenticate`. The dev adapter (`devAuth.adapter.ts`) checks a bcrypt hash in `users.password_hash` (admin role only for this panel) and issues an HS256 JWT in an httpOnly, SameSite=Lax cookie signed with `SESSION_SECRET`. To move to a hosted identity provider, implement the same port and change the single wiring point in `src/lib/auth/auth.ts`. Routes and services don't change.
+Push and PR to `main` run [`.github/workflows/ci.yml`](.github/workflows/ci.yml): `npm ci` → Postgres 17 → migrate → lint → typecheck → test → build.
+
+Locally: `make db-migrate && make check` with Postgres up and `.env` configured.
+
+For GitHub: require the CI workflow (or `quality` job) on `main` before merge.
