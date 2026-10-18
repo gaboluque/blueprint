@@ -8,7 +8,7 @@ type BaseFilterField<Q> = {
   label: string;
 };
 
-/** Commits on **Buscar** or Enter. */
+/** Commits on **Search** or Enter. */
 export type SearchFilterField<Q> = BaseFilterField<Q> & {
   type: "search";
   placeholder?: string;

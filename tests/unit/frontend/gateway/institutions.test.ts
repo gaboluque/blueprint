@@ -30,7 +30,10 @@ describe("AdminInstitutions", () => {
   it("creates an institution and surfaces field errors on conflict", async () => {
     const body = { name: "Nueva", slug: "ficticia-norte", contactEmail: "a@ficticia.test" };
     const fetchMock = mockFetch(
-      jsonResponse({ ok: false, error: "Ese slug ya está en uso.", fieldErrors: { slug: "Ya existe." } }, 409),
+      jsonResponse(
+        { ok: false, error: "An institution with that slug already exists.", fieldErrors: { slug: "Already exists." } },
+        409,
+      ),
     );
 
     const result = await AdminInstitutions.create(body);
@@ -39,8 +42,8 @@ describe("AdminInstitutions", () => {
     expect(result).toEqual({
       ok: false,
       status: 409,
-      error: "Ese slug ya está en uso.",
-      fieldErrors: { slug: "Ya existe." },
+      error: "An institution with that slug already exists.",
+      fieldErrors: { slug: "Already exists." },
     });
   });
 
@@ -108,6 +111,6 @@ describe("AdminInstitutions", () => {
 
     const result = await AdminInstitutions.get(institution.id);
 
-    expect(result).toEqual({ ok: false, status: 0, error: "No pudimos conectar con el servidor. Revisa tu conexión." });
+    expect(result).toEqual({ ok: false, status: 0, error: "Couldn't reach the server. Check your connection." });
   });
 });

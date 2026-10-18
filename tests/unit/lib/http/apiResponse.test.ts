@@ -33,15 +33,15 @@ describe("ApiResponse", () => {
   });
 
   it("includes field errors only when present", async () => {
-    const withFields = ApiResponse.error("Revisa los datos enviados.", 400, { slug: "Inválido" });
-    const withoutFields = ApiResponse.error("No encontramos la institución.", 404);
+    const withFields = ApiResponse.error("Check the submitted data.", 400, { slug: "Invalid" });
+    const withoutFields = ApiResponse.error("We couldn't find the institution.", 404);
 
     expect(withFields.status).toBe(400);
     expect(await withFields.json()).toEqual({
       ok: false,
-      error: "Revisa los datos enviados.",
-      fieldErrors: { slug: "Inválido" },
+      error: "Check the submitted data.",
+      fieldErrors: { slug: "Invalid" },
     });
-    expect(await withoutFields.json()).toEqual({ ok: false, error: "No encontramos la institución." });
+    expect(await withoutFields.json()).toEqual({ ok: false, error: "We couldn't find the institution." });
   });
 });

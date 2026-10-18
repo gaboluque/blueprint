@@ -10,10 +10,10 @@ export function FormActions({ submitLabel, pending, onCancel }: FormActionsProps
   return (
     <div className="flex justify-end gap-2">
       <Button variant="secondary" onClick={onCancel} disabled={pending}>
-        Cancelar
+        Cancel
       </Button>
       <Button type="submit" disabled={pending}>
-        {pending ? "Guardando…" : submitLabel}
+        {pending ? "Saving…" : submitLabel}
       </Button>
     </div>
   );

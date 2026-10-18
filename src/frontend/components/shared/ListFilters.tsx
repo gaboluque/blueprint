@@ -6,7 +6,7 @@ import { SelectField } from "@/frontend/components/ui/SelectField";
 import { TextField } from "@/frontend/components/ui/TextField";
 import type { FilterField, SearchFilterField, SelectFilterField } from "./listTypes";
 
-const SEARCH_BUTTON_LABEL = "Buscar";
+const SEARCH_BUTTON_LABEL = "Search";
 
 type ListFiltersProps<Q> = {
   fields: FilterField<Q>[];

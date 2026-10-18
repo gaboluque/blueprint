@@ -13,7 +13,7 @@ import { idParamsSchema } from "@/lib/validation/schemas";
 import { buildAdminActor, buildInstitutionStaffActor, INSTITUTION_ID } from "../../../factories/models";
 
 const VALID_TOKEN = "valid-token";
-const OPTIONS = { route: "TEST /api/admin/things", fallbackError: "No pudimos completar la solicitud." };
+const OPTIONS = { route: "TEST /api/admin/things", fallbackError: "We couldn't complete the request." };
 const bodySchema = z.strictObject({ name: z.string().min(1) });
 
 function makeLogger(): jest.Mocked<Logger> {
@@ -63,7 +63,7 @@ describe("AdminApiHandler", () => {
     const response = await route(makeRequest("/api/admin/things"));
 
     expect(response.status).toBe(401);
-    expect(await response.json()).toEqual({ ok: false, error: "Debes iniciar sesión." });
+    expect(await response.json()).toEqual({ ok: false, error: "You must sign in." });
     expect(handler).not.toHaveBeenCalled();
   });
 
@@ -74,7 +74,7 @@ describe("AdminApiHandler", () => {
     const response = await route(makeRequest("/api/admin/things", { token: "forged" }));
 
     expect(response.status).toBe(401);
-    expect(await response.json()).toEqual({ ok: false, error: "Tu sesión expiró. Inicia sesión de nuevo." });
+    expect(await response.json()).toEqual({ ok: false, error: "Your session expired. Sign in again." });
   });
 
   it("returns 401 for a valid institution staff session", async () => {
@@ -139,7 +139,7 @@ describe("AdminApiHandler", () => {
     const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json).toMatchObject({ ok: false, error: "Revisa los datos enviados." });
+    expect(json).toMatchObject({ ok: false, error: "Check the submitted data." });
     expect(Object.keys(json.fieldErrors)).toEqual(["id"]);
     expect(handler).not.toHaveBeenCalled();
   });
@@ -184,7 +184,7 @@ describe("AdminApiHandler", () => {
     const response = await route(makeRequest("/api/admin/things", { token: VALID_TOKEN }));
 
     expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ ok: false, error: "No encontramos la institución." });
+    expect(await response.json()).toEqual({ ok: false, error: "We couldn't find the institution." });
     expect(logger.error).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
       expect.objectContaining({ status: 404, err: expect.objectContaining({ name: "NotFoundError" }) }),

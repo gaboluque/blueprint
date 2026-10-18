@@ -55,21 +55,21 @@ export function StudentForm({
       {mutation.error && <Alert>{fieldErrors._root ?? mutation.error}</Alert>}
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
-          label="Nombres"
+          label="First name"
           required
           value={values.firstName}
           onChange={setField("firstName")}
           error={fieldErrors.firstName}
         />
         <TextField
-          label="Apellidos"
+          label="Last name"
           required
           value={values.lastName}
           onChange={setField("lastName")}
           error={fieldErrors.lastName}
         />
         <TextField
-          label="Correo electrónico"
+          label="Email"
           type="email"
           required
           value={values.email}
@@ -77,14 +77,14 @@ export function StudentForm({
           error={fieldErrors.email}
         />
         <TextField
-          label="Documento de identidad"
+          label="Document ID"
           required
           value={values.documentId}
           onChange={setField("documentId")}
           error={fieldErrors.documentId}
         />
         <SelectField
-          label="Estado"
+          label="Status"
           value={values.status}
           options={STATUS_OPTIONS}
           onChange={setField("status")}

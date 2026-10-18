@@ -29,7 +29,7 @@ export function ListShell({
           <Alert
             action={
               <Button variant="secondary" onClick={onRetry}>
-                Reintentar
+                Retry
               </Button>
             }
           >

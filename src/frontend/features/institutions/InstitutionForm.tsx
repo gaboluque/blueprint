@@ -43,16 +43,10 @@ export function InstitutionForm({
     <form onSubmit={onSubmit} noValidate className="space-y-4" aria-label={submitLabel}>
       {mutation.error && <Alert>{fieldErrors._root ?? mutation.error}</Alert>}
       <div className="grid gap-4 sm:grid-cols-3">
-        <TextField label="Nombre" required value={values.name} onChange={setField("name")} error={fieldErrors.name} />
+        <TextField label="Name" required value={values.name} onChange={setField("name")} error={fieldErrors.name} />
+        <TextField label="Slug" required value={values.slug} onChange={setField("slug")} error={fieldErrors.slug} />
         <TextField
-          label="Identificador (slug)"
-          required
-          value={values.slug}
-          onChange={setField("slug")}
-          error={fieldErrors.slug}
-        />
-        <TextField
-          label="Correo de contacto"
+          label="Contact email"
           type="email"
           required
           value={values.contactEmail}

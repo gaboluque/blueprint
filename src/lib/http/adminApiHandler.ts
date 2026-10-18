@@ -14,7 +14,7 @@ function create(getProvider: () => AuthProvider = Auth.provider, deps?: ApiHandl
  *
  * Handler `ctx`: `actor` (signed-in admin), `repos` (`AppRepos`), `transaction(work)`, `params` / `query` / `body` (typed from options schemas), `request`, `requestId`.
  *
- * Options: `route` (log label), `fallbackError` (Spanish 500 message), optional `paramsSchema`, `querySchema`, `bodySchema`.
+ * Options: `route` (log label), `fallbackError` (500 message), optional `paramsSchema`, `querySchema`, `bodySchema`.
  *
  * Return: plain value (`200`), `HandlerResults.created` / `.page` / `.noContent`, or `Response` (cookies). Export `runtime = "nodejs"` on the route module.
  *

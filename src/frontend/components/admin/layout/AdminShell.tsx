@@ -17,11 +17,11 @@ export function AdminShell({ adminName, children }: AdminShellProps) {
             <Link href={AdminRoutes.home} className="font-semibold text-teal-800">
               Blueprint · Admin
             </Link>
-            <nav aria-label="Principal">
+            <nav aria-label="Main">
               <ul className="flex gap-4 text-sm">
                 <li>
                   <Link href={AdminRoutes.institutions} className="text-slate-700 hover:text-teal-800">
-                    Instituciones
+                    Institutions
                   </Link>
                 </li>
               </ul>

@@ -47,16 +47,16 @@ describe("InstitutionsListPage", () => {
       `/admin/institutions/${norte.id}`,
     );
     expect(within(norteRow as HTMLElement).getByRole("cell", { name: "3" })).toBeInTheDocument();
-    expect(within(norteRow as HTMLElement).getByText("Activa")).toBeInTheDocument();
-    expect(within(surRow as HTMLElement).getByText("Archivada")).toBeInTheDocument();
-    expect(screen.getByText(/Página 1 de 1 · 2 resultados/)).toBeInTheDocument();
+    expect(within(norteRow as HTMLElement).getByText("Active")).toBeInTheDocument();
+    expect(within(surRow as HTMLElement).getByText("Archived")).toBeInTheDocument();
+    expect(screen.getByText(/Page 1 of 1 · 2 results/)).toBeInTheDocument();
   });
 
   it("refetches from page 1 when the status filter changes", async () => {
     render(<InstitutionsListPage />);
     await screen.findByRole("link", { name: "Norte" });
 
-    await userEvent.selectOptions(screen.getByLabelText("Estado"), "archived");
+    await userEvent.selectOptions(screen.getByLabelText("Status"), "archived");
 
     expect(list).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, status: "archived" }));
     expect(mockRouter.replace).toHaveBeenCalledWith("/admin/institutions?status=archived", { scroll: false });
@@ -71,28 +71,28 @@ describe("InstitutionsListPage", () => {
     await waitFor(() =>
       expect(list).toHaveBeenCalledWith(expect.objectContaining({ status: "archived", search: "norte", page: 1 })),
     );
-    expect(screen.getByLabelText("Buscar por nombre o slug")).toHaveValue("norte");
+    expect(screen.getByLabelText("Search by name or slug")).toHaveValue("norte");
   });
 
   it("applies the search only when it is submitted", async () => {
     render(<InstitutionsListPage />);
     await screen.findByRole("link", { name: "Norte" });
 
-    await userEvent.type(screen.getByLabelText("Buscar por nombre o slug"), "  norte ");
+    await userEvent.type(screen.getByLabelText("Search by name or slug"), "  norte ");
     const callsWhileTyping = list.mock.calls.length;
-    await userEvent.click(screen.getByRole("button", { name: "Buscar" }));
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
 
     expect(callsWhileTyping).toBe(1);
     expect(list).toHaveBeenLastCalledWith(expect.objectContaining({ search: "norte", page: 1 }));
   });
 
   it("shows a load error inline and retries on demand", async () => {
-    list.mockResolvedValueOnce({ ok: false, status: 500, error: "No pudimos cargar las instituciones." });
+    list.mockResolvedValueOnce({ ok: false, status: 500, error: "We couldn't load institutions." });
     render(<InstitutionsListPage />);
 
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("No pudimos cargar las instituciones.");
-    await userEvent.click(within(alert).getByRole("button", { name: "Reintentar" }));
+    expect(alert).toHaveTextContent("We couldn't load institutions.");
+    await userEvent.click(within(alert).getByRole("button", { name: "Retry" }));
 
     expect(await screen.findByRole("link", { name: "Norte" })).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -100,7 +100,7 @@ describe("InstitutionsListPage", () => {
 
   it("signs out before sending the user to login when the session expired, so login can't bounce back", async () => {
     jest.mocked(AdminSession.signOut).mockResolvedValue({ ok: true, data: null });
-    list.mockResolvedValueOnce({ ok: false, status: 401, error: "Tu sesión expiró. Inicia sesión de nuevo." });
+    list.mockResolvedValueOnce({ ok: false, status: 401, error: "Your session expired. Sign in again." });
 
     render(<InstitutionsListPage />);
 
@@ -112,7 +112,7 @@ describe("InstitutionsListPage", () => {
   });
 
   it("doesn't sign out on errors other than 401", async () => {
-    list.mockResolvedValueOnce({ ok: false, status: 500, error: "No pudimos cargar las instituciones." });
+    list.mockResolvedValueOnce({ ok: false, status: 500, error: "We couldn't load institutions." });
 
     render(<InstitutionsListPage />);
 

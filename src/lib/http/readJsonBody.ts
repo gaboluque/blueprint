@@ -10,14 +10,14 @@ const JSON_CONTENT_TYPE = "application/json";
 async function readJsonBody(request: Request): Promise<unknown> {
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.toLowerCase().startsWith(JSON_CONTENT_TYPE)) {
-    throw new HttpError("El cuerpo debe enviarse como JSON (Content-Type: application/json).", 415);
+    throw new HttpError("The body must be JSON (Content-Type: application/json).", 415);
   }
   const text = await request.text();
-  if (!text.trim()) throw new InputParseError("El cuerpo de la solicitud está vacío.");
+  if (!text.trim()) throw new InputParseError("The request body is empty.");
   try {
     return JSON.parse(text);
   } catch {
-    throw new InputParseError("El cuerpo de la solicitud no es JSON válido.");
+    throw new InputParseError("The request body is not valid JSON.");
   }
 }
 

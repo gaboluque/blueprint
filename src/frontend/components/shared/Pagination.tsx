@@ -9,16 +9,16 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <nav aria-label="Paginación" className="mt-4 flex items-center justify-between text-sm text-slate-600">
+    <nav aria-label="Pagination" className="mt-4 flex items-center justify-between text-sm text-slate-600">
       <p>
-        Página {page} de {totalPages} · {total} {total === 1 ? "resultado" : "resultados"}
+        Page {page} of {totalPages} · {total} {total === 1 ? "result" : "results"}
       </p>
       <div className="flex gap-2">
         <Button variant="secondary" onClick={() => onPageChange(page - 1)} disabled={page <= 1}>
-          Anterior
+          Previous
         </Button>
         <Button variant="secondary" onClick={() => onPageChange(page + 1)} disabled={page >= totalPages}>
-          Siguiente
+          Next
         </Button>
       </div>
     </nav>

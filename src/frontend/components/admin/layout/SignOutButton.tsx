@@ -25,7 +25,7 @@ export function SignOutButton() {
         </span>
       )}
       <Button variant="ghost" onClick={onClick} disabled={signOut.pending}>
-        {signOut.pending ? "Cerrando sesión…" : "Cerrar sesión"}
+        {signOut.pending ? "Signing out…" : "Sign out"}
       </Button>
     </div>
   );

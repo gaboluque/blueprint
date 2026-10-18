@@ -21,7 +21,7 @@ function isInstitutionAdmin(actor: Actor): boolean {
 /**
  * Fail closed: throws {@link ForbiddenError} (403) unless `allowed` is strictly `true`.
  * Call from services after a domain `*.policy.ts` check, e.g. `Policy.authorize(InstitutionPolicy.canUpdate(actor, institution))`.
- * Optional `message` is user-facing Spanish; omit to use the default forbidden message.
+ * Optional `message` is user-facing; omit to use the default forbidden message.
  */
 function authorize(allowed: boolean, message?: string): void {
   if (!allowed) throw new ForbiddenError(message);

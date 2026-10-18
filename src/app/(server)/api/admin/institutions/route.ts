@@ -15,7 +15,7 @@ export const GET = AdminApiHandler(
     HandlerResults.page(await ListInstitutions.call(repos, actor, query), InstitutionView.formatListItem),
   {
     route: "GET /api/admin/institutions",
-    fallbackError: "No pudimos cargar las instituciones.",
+    fallbackError: "We couldn't load institutions.",
     querySchema: listInstitutionsQuerySchema,
   },
 );
@@ -27,7 +27,7 @@ export const POST = AdminApiHandler(
     ),
   {
     route: "POST /api/admin/institutions",
-    fallbackError: "No pudimos crear la institución.",
+    fallbackError: "We couldn't create the institution.",
     bodySchema: createInstitutionBodySchema,
   },
 );

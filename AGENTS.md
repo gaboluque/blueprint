@@ -12,7 +12,7 @@ Source of truth for AI agents working in this repo. Admin panel for institutions
 4. **The frontend never touches the database.** `src/frontend/**` and `src/app/**/{page,layout}.tsx` don't import `@/lib/db/*`, repos, `drizzle-orm`, or `pg` (ESLint enforces it). Data flows through `src/frontend/gateway` → API route.
 5. **No hard delete of institutions.** `DELETE` archives. `InstitutionsRepo` doesn't expose `delete`.
 6. **Fake data only** in seeds and tests. Never add an AI agent as a coauthor on commits or PRs.
-7. No `any`, no `@ts-ignore`, no magic strings: Spanish error messages live in `<domain>.errors.ts`.
+7. No `any`, no `@ts-ignore`, no magic strings: English error messages live in `<domain>.errors.ts`.
 
 ## Request flow
 
@@ -58,7 +58,7 @@ src/
     errors/     DomainError subclasses, HttpError, ErrorMapping
     http/       ApiResponse, envelope, readJsonBody, HandlerResults, apiHandler factory, AdminApiHandler
     policy/     Policy.isAdmin / Policy.authorize
-    validation/ Validation.parse (Spanish Zod messages), shared schemas
+    validation/ Validation.parse (English Zod messages), shared schemas
     date.ts     formatDate (browser- and server-safe)
 db/migrations/                    drizzle-kit SQL; review generated SQL, do not rewrite by hand
 scripts/db-generate.mjs           requires a declarative migration name (snake_case)
@@ -84,7 +84,7 @@ A new feature touches four folders: `frontend/gateway/<domain>.ts` (one method p
 - **Rate limiting:** `RateLimiter` (`src/lib/http/rateLimiter.ts`) is an in-memory fixed window — fine for one instance, not for horizontal scaling. Swap for a shared store (Postgres, Redis) before running more than one. `POST /api/admin/sessions` is the only consumer today.
 - **Async / background work:** none yet. When a feature needs it (email, slow jobs), call the work inline from the service first; only add a queue (pg-boss, BullMQ + Redis, QStash, …) once more than one feature needs deferred work — don't build the abstraction speculatively.
 - **Schema changes:** edit `src/lib/db/schema.ts` → `make db-generate NAME=<snake_case>` (required; never accept drizzle-kit’s random Marvel names) → review the SQL in `db/migrations` → `make db-migrate`. Names describe the change (`add_audit_events`, not `0001_demonic_matthew_murdock`). Same via `npm run db:generate -- add_audit_events`.
-- **Copy:** Spanish (es-CO) for all user-facing text. Code, comments, and logs in English. Comments only for a non-obvious why.
+- **Copy:** English for all user-facing text. Code, comments, and logs in English. Comments only for a non-obvious why.
 
 ## Route template
 
@@ -96,7 +96,7 @@ export const PATCH = AdminApiHandler(
     InstitutionView.format(await UpdateInstitution.call(repos, actor, { id: params.id, patch: body })),
   {
     route: "PATCH /api/admin/institutions/[id]",
-    fallbackError: "No pudimos actualizar la institución.",
+    fallbackError: "We couldn't update the institution.",
     paramsSchema: idParamsSchema,
     bodySchema: updateInstitutionBodySchema,
   },

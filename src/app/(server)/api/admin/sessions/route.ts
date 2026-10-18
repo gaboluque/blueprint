@@ -11,8 +11,8 @@ import { RateLimiter } from "@/lib/http/rateLimiter";
 
 export const runtime = "nodejs";
 
-const INVALID_CREDENTIALS_MESSAGE = "Correo o contraseña incorrectos.";
-const TOO_MANY_ATTEMPTS_MESSAGE = "Demasiados intentos. Intenta de nuevo en un minuto.";
+const INVALID_CREDENTIALS_MESSAGE = "Incorrect email or password.";
+const TOO_MANY_ATTEMPTS_MESSAGE = "Too many attempts. Try again in a minute.";
 const SIGN_IN_RATE_LIMIT = { limit: 5, windowMs: 60_000 };
 
 function clientIp(request: Request): string {
@@ -40,7 +40,7 @@ export const POST = PublicApiHandler(
   },
   {
     route: "POST /api/admin/sessions",
-    fallbackError: "No pudimos iniciar sesión.",
+    fallbackError: "We couldn't sign you in.",
     bodySchema: signInBodySchema,
   },
 );
@@ -63,5 +63,5 @@ export const DELETE = PublicApiHandler(
     SessionCookie.clear(response);
     return response;
   },
-  { route: "DELETE /api/admin/sessions", fallbackError: "No pudimos cerrar la sesión." },
+  { route: "DELETE /api/admin/sessions", fallbackError: "We couldn't sign you out." },
 );

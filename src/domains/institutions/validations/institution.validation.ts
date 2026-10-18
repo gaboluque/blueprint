@@ -11,7 +11,7 @@ const slugSchema = z
   .toLowerCase()
   .min(2)
   .max(64)
-  .regex(SLUG_PATTERN, { error: "Usa solo minúsculas, números y guiones." });
+  .regex(SLUG_PATTERN, { error: "Use lowercase letters, numbers, and hyphens only." });
 
 /** `GET /api/admin/institutions`. Omitted `status` = all statuses. */
 export const listInstitutionsQuerySchema = paginationQuerySchema.extend({
@@ -29,7 +29,7 @@ export const createInstitutionBodySchema = z.strictObject({
 /** `PATCH /api/admin/institutions/[id]`. Status changes only via `DELETE` (archive). */
 export const updateInstitutionBodySchema = createInstitutionBodySchema
   .partial()
-  .refine((body) => Object.keys(body).length > 0, { error: "Envía al menos un campo para actualizar." });
+  .refine((body) => Object.keys(body).length > 0, { error: "Send at least one field to update." });
 
 export type ListInstitutionsQuery = z.infer<typeof listInstitutionsQuerySchema>;
 export type CreateInstitutionBody = z.infer<typeof createInstitutionBodySchema>;

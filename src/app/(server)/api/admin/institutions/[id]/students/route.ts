@@ -16,7 +16,7 @@ export const GET = AdminApiHandler(
     ),
   {
     route: "GET /api/admin/institutions/[id]/students",
-    fallbackError: "No pudimos cargar los estudiantes.",
+    fallbackError: "We couldn't load students.",
     paramsSchema: idParamsSchema,
     querySchema: listStudentsQuerySchema,
   },
@@ -29,7 +29,7 @@ export const POST = AdminApiHandler(
   },
   {
     route: "POST /api/admin/institutions/[id]/students",
-    fallbackError: "No pudimos crear el estudiante.",
+    fallbackError: "We couldn't create the student.",
     paramsSchema: idParamsSchema,
     bodySchema: createStudentBodySchema,
   },

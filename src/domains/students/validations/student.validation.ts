@@ -28,7 +28,7 @@ export const updateStudentBodySchema = z
     status: z.enum(studentStatus.enumValues),
   })
   .partial()
-  .refine((body) => Object.keys(body).length > 0, { error: "Envía al menos un campo para actualizar." });
+  .refine((body) => Object.keys(body).length > 0, { error: "Send at least one field to update." });
 
 export type ListStudentsQuery = z.infer<typeof listStudentsQuerySchema>;
 export type CreateStudentBody = z.infer<typeof createStudentBodySchema>;

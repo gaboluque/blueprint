@@ -12,7 +12,7 @@ export const GET = AdminApiHandler(
   async ({ actor, repos, params }) => StudentView.format(await GetStudent.call(repos, actor, { id: params.id })),
   {
     route: "GET /api/admin/students/[id]",
-    fallbackError: "No pudimos cargar el estudiante.",
+    fallbackError: "We couldn't load the student.",
     paramsSchema: idParamsSchema,
   },
 );
@@ -22,7 +22,7 @@ export const PATCH = AdminApiHandler(
     StudentView.format(await transaction((repos) => UpdateStudent.call(repos, actor, { id: params.id, patch: body }))),
   {
     route: "PATCH /api/admin/students/[id]",
-    fallbackError: "No pudimos actualizar el estudiante.",
+    fallbackError: "We couldn't update the student.",
     paramsSchema: idParamsSchema,
     bodySchema: updateStudentBodySchema,
   },
@@ -34,7 +34,7 @@ export const DELETE = AdminApiHandler(
     StudentView.format(await transaction((repos) => DeactivateStudent.call(repos, actor, { id: params.id }))),
   {
     route: "DELETE /api/admin/students/[id]",
-    fallbackError: "No pudimos desactivar el estudiante.",
+    fallbackError: "We couldn't deactivate the student.",
     paramsSchema: idParamsSchema,
   },
 );

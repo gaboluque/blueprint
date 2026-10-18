@@ -9,16 +9,16 @@ import {
 import { ErrorMapping } from "@/lib/errors/errorMapping";
 import { HttpError } from "@/lib/errors/http.errors";
 
-const FALLBACK = "No pudimos completar la solicitud.";
+const FALLBACK = "We couldn't complete the request.";
 
 describe("ErrorMapping.map", () => {
   it.each([
-    [new InputParseError("Datos inválidos."), 400],
+    [new InputParseError("Invalid data."), 400],
     [new UnauthorizedError(), 401],
     [new ForbiddenError(), 403],
     [new NotFoundError(), 404],
     [new ConflictError(), 409],
-    [new UnprocessableError("No aplica."), 422],
+    [new UnprocessableError("Not applicable."), 422],
   ])("maps %p to %i and keeps its message", (error, status) => {
     const mapped = ErrorMapping.map(error, FALLBACK);
 
@@ -26,21 +26,21 @@ describe("ErrorMapping.map", () => {
   });
 
   it("keeps field errors from input errors", () => {
-    const mapped = ErrorMapping.map(new InputParseError("Datos inválidos.", { email: "Correo inválido" }), FALLBACK);
+    const mapped = ErrorMapping.map(new InputParseError("Invalid data.", { email: "Invalid email" }), FALLBACK);
 
-    expect(mapped.fieldErrors).toEqual({ email: "Correo inválido" });
+    expect(mapped.fieldErrors).toEqual({ email: "Invalid email" });
   });
 
   it("drops an empty field error map", () => {
-    const mapped = ErrorMapping.map(new InputParseError("Datos inválidos.", {}), FALLBACK);
+    const mapped = ErrorMapping.map(new InputParseError("Invalid data.", {}), FALLBACK);
 
     expect(mapped.fieldErrors).toBeUndefined();
   });
 
   it("uses the status of an HttpError", () => {
-    const mapped = ErrorMapping.map(new HttpError("Tipo de contenido no soportado.", 415), FALLBACK);
+    const mapped = ErrorMapping.map(new HttpError("Unsupported media type.", 415), FALLBACK);
 
-    expect(mapped).toMatchObject({ status: 415, message: "Tipo de contenido no soportado.", expected: true });
+    expect(mapped).toMatchObject({ status: 415, message: "Unsupported media type.", expected: true });
   });
 
   it("hides unexpected errors behind the fallback message", () => {

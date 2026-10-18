@@ -25,12 +25,12 @@ import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 const INITIAL_QUERY: ListStudentsQuery = { page: 1, pageSize: DEFAULT_PAGE_SIZE, search: undefined };
 
 const FILTER_FIELDS: FilterField<ListStudentsQuery>[] = [
-  { type: "search", name: "search", label: "Buscar por nombre, correo o documento" },
+  { type: "search", name: "search", label: "Search by name, email, or ID document" },
   {
     type: "select",
     name: "status",
-    label: "Estado",
-    allLabel: "Todos",
+    label: "Status",
+    allLabel: "All",
     options: recordToOptions(STUDENT_STATUS_LABELS),
   },
 ];
@@ -38,16 +38,16 @@ const FILTER_FIELDS: FilterField<ListStudentsQuery>[] = [
 const COLUMNS: DataTableColumn<StudentDto>[] = [
   {
     key: "fullName",
-    header: "Nombre",
+    header: "Name",
     cell: (student) => (
       <Link href={AdminRoutes.student(student.id)} className="font-medium text-teal-800 hover:underline">
         {student.fullName}
       </Link>
     ),
   },
-  { key: "email", header: "Correo", cell: (student) => student.email },
-  { key: "documentId", header: "Documento", cell: (student) => student.documentId },
-  { key: "status", header: "Estado", cell: (student) => <StudentStatusBadge status={student.status} /> },
+  { key: "email", header: "Email", cell: (student) => student.email },
+  { key: "documentId", header: "Document ID", cell: (student) => student.documentId },
+  { key: "status", header: "Status", cell: (student) => <StudentStatusBadge status={student.status} /> },
 ];
 
 type InstitutionStudentsSectionProps = {
@@ -73,14 +73,14 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
 
   return (
     <Card
-      title="Estudiantes"
-      actions={!readOnly && !isAdding && <Button onClick={() => setIsAdding(true)}>Agregar estudiante</Button>}
+      title="Students"
+      actions={!readOnly && !isAdding && <Button onClick={() => setIsAdding(true)}>Add student</Button>}
     >
       {isAdding && !readOnly && (
         <div className="mb-6 rounded-md border border-slate-200 p-4">
-          <h3 className="mb-3 font-medium text-slate-900">Nuevo estudiante</h3>
+          <h3 className="mb-3 font-medium text-slate-900">New student</h3>
           <StudentForm
-            submitLabel="Agregar estudiante"
+            submitLabel="Add student"
             submit={create}
             onSuccess={() => {
               setIsAdding(false);
@@ -97,14 +97,9 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
         error={list.error}
         onRetry={list.refetch}
         isEmpty={list.data.length === 0}
-        emptyMessage="No hay estudiantes que coincidan con los filtros."
+        emptyMessage="No students match the filters."
       >
-        <DataTable
-          caption="Estudiantes de la institución"
-          columns={COLUMNS}
-          rows={list.data}
-          rowKey={(row) => row.id}
-        />
+        <DataTable caption="Students at this institution" columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
         <Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />
       </ListShell>
     </Card>

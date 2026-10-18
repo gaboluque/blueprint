@@ -26,12 +26,12 @@ import { InstitutionForm } from "./InstitutionForm";
 const INITIAL_QUERY: ListInstitutionsQuery = { page: 1, pageSize: DEFAULT_PAGE_SIZE, search: undefined };
 
 const FILTER_FIELDS: FilterField<ListInstitutionsQuery>[] = [
-  { type: "search", name: "search", label: "Buscar por nombre o slug" },
+  { type: "search", name: "search", label: "Search by name or slug" },
   {
     type: "select",
     name: "status",
-    label: "Estado",
-    allLabel: "Todas",
+    label: "Status",
+    allLabel: "All",
     options: recordToOptions(INSTITUTION_STATUS_LABELS),
   },
 ];
@@ -39,7 +39,7 @@ const FILTER_FIELDS: FilterField<ListInstitutionsQuery>[] = [
 const COLUMNS: DataTableColumn<InstitutionListItemDto>[] = [
   {
     key: "name",
-    header: "Nombre",
+    header: "Name",
     cell: (institution) => (
       <Link href={AdminRoutes.institution(institution.id)} className="font-medium text-teal-800 hover:underline">
         {institution.name}
@@ -47,10 +47,10 @@ const COLUMNS: DataTableColumn<InstitutionListItemDto>[] = [
     ),
   },
   { key: "slug", header: "Slug", cell: (institution) => institution.slug },
-  { key: "contactEmail", header: "Correo de contacto", cell: (institution) => institution.contactEmail },
-  { key: "studentCount", header: "Estudiantes", align: "right", cell: (institution) => institution.studentCount },
-  { key: "status", header: "Estado", cell: (institution) => <InstitutionStatusBadge status={institution.status} /> },
-  { key: "createdAt", header: "Creada", cell: (institution) => formatDate(institution.createdAt) },
+  { key: "contactEmail", header: "Contact email", cell: (institution) => institution.contactEmail },
+  { key: "studentCount", header: "Students", align: "right", cell: (institution) => institution.studentCount },
+  { key: "status", header: "Status", cell: (institution) => <InstitutionStatusBadge status={institution.status} /> },
+  { key: "createdAt", header: "Created", cell: (institution) => formatDate(institution.createdAt) },
 ];
 
 export function InstitutionsListPage() {
@@ -64,12 +64,12 @@ export function InstitutionsListPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold text-slate-900">Instituciones</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">Institutions</h1>
 
       {isCreating && (
-        <Card title="Nueva institución">
+        <Card title="New institution">
           <InstitutionForm
-            submitLabel="Crear institución"
+            submitLabel="Create institution"
             submit={AdminInstitutions.create}
             onSuccess={(institution) => router.push(AdminRoutes.institution(institution.id))}
             onCancel={() => setIsCreating(false)}
@@ -77,10 +77,7 @@ export function InstitutionsListPage() {
         </Card>
       )}
 
-      <Card
-        title="Listado"
-        actions={!isCreating && <Button onClick={() => setIsCreating(true)}>Nueva institución</Button>}
-      >
+      <Card title="List" actions={!isCreating && <Button onClick={() => setIsCreating(true)}>New institution</Button>}>
         <ListFilters fields={FILTER_FIELDS} query={list.query} onChange={list.patchQuery} />
         <ListShell
           isLoading={list.isLoading}
@@ -88,9 +85,9 @@ export function InstitutionsListPage() {
           error={list.error}
           onRetry={list.refetch}
           isEmpty={list.data.length === 0}
-          emptyMessage="No hay instituciones que coincidan con los filtros."
+          emptyMessage="No institutions match the filters."
         >
-          <DataTable caption="Instituciones" columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
+          <DataTable caption="Institutions" columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
           <Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />
         </ListShell>
       </Card>

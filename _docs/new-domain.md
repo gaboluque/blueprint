@@ -13,9 +13,9 @@ Use `src/domains/institutions/` as the template. One user-facing capability usua
 | File                                 | Role                                                                                                                |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `<entity>.model.ts`                  | Class with field behavior; inject `now` for time; no db handle                                                      |
-| `<entities>.repo.ts`                 | Extends `BaseRepo`; `toModel(row)`; named queries only when `where` is not enough; set `conflictMessage` in Spanish |
+| `<entities>.repo.ts`                 | Extends `BaseRepo`; `toModel(row)`; named queries only when `where` is not enough; set `conflictMessage` in English |
 | `<entity>.policy.ts`                 | `canX(actor, entity)` → `boolean` only                                                                              |
-| `<entity>.errors.ts`                 | Factory (`InstitutionErrors.notFound()`); all Spanish messages for the domain                                       |
+| `<entity>.errors.ts`                 | Factory (`InstitutionErrors.notFound()`); all English messages for the domain                                       |
 | `validations/<entity>.validation.ts` | Zod `strictObject` schemas; export input types                                                                      |
 | `views/<entity>.view.ts`             | `export const XxxView = { format }` → wire DTOs                                                                     |
 | `services/<verbNoun>.service.ts`     | `export const VerbNoun = { call }`; signature `call(repos, actor, input)`                                           |
@@ -69,6 +69,6 @@ Conventions and examples: [`tests.md`](tests.md).
 
 - Reading `status`, `archivedAt`, `institutionId`, or ids from request bodies on update
 - Importing `@/lib/db/*`, repos, or `drizzle-orm` from `src/frontend/**` or page/layout files
-- Inline Spanish error strings in services (use `*.errors.ts`)
+- Inline English error strings in services (use `*.errors.ts`)
 - Hard delete on institutions (archive only)
 - Skipping `RepoRegistry` when adding a table repo

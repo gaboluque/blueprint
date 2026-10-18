@@ -23,9 +23,9 @@ function InstitutionDetails({ institution }: { institution: InstitutionDto }) {
     <DescriptionList
       items={[
         { term: "Slug", detail: institution.slug },
-        { term: "Correo de contacto", detail: institution.contactEmail },
-        { term: "Creada", detail: formatDate(institution.createdAt) },
-        { term: "Archivada", detail: institution.archivedAt ? formatDate(institution.archivedAt) : "—" },
+        { term: "Contact email", detail: institution.contactEmail },
+        { term: "Created", detail: formatDate(institution.createdAt) },
+        { term: "Archived", detail: institution.archivedAt ? formatDate(institution.archivedAt) : "—" },
       ]}
     />
   );
@@ -47,7 +47,7 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
       <Alert
         action={
           <Button variant="secondary" onClick={resource.reload}>
-            Reintentar
+            Retry
           </Button>
         }
       >
@@ -63,7 +63,7 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
     <>
       <div>
         <Link href={AdminRoutes.institutions} className="text-sm text-teal-800 hover:underline">
-          ← Instituciones
+          ← Institutions
         </Link>
         <div className="mt-2 flex items-center gap-3">
           <h1 className="text-2xl font-semibold text-slate-900">{institution.name}</h1>
@@ -71,21 +71,21 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
         </div>
       </div>
 
-      {readOnly && <Alert tone="info">Esta institución está archivada. Solo puedes consultar su información.</Alert>}
+      {readOnly && <Alert tone="info">This institution is archived. You can only view its information.</Alert>}
 
       <Card
-        title="Información"
+        title="Details"
         actions={
           !readOnly &&
           !isEditing && (
             <>
               <Button variant="secondary" onClick={() => setIsEditing(true)}>
-                Editar
+                Edit
               </Button>
               <ConfirmActionButton
-                label="Archivar"
-                title={`¿Archivar ${institution.name}?`}
-                description="La institución quedará en modo solo lectura. Sus estudiantes se conservan."
+                label="Archive"
+                title={`Archive ${institution.name}?`}
+                description="The institution becomes read-only. Its students are kept."
                 action={archive}
                 onDone={resource.replace}
               />
@@ -96,7 +96,7 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
         {isEditing ? (
           <InstitutionForm
             initialValues={{ name: institution.name, slug: institution.slug, contactEmail: institution.contactEmail }}
-            submitLabel="Guardar cambios"
+            submitLabel="Save changes"
             submit={update}
             onSuccess={(updated) => {
               resource.replace(updated);

@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Blueprint · Administración",
-  description: "Panel de administración de instituciones y estudiantes.",
+  title: "Blueprint · Admin",
+  description: "Admin panel for institutions and students.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

@@ -19,7 +19,7 @@ export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
 
 export type QueryParams = Record<string, string | number | boolean | null | undefined>;
 
-const NETWORK_ERROR = "No pudimos conectar con el servidor. Revisa tu conexión.";
+const NETWORK_ERROR = "Couldn't reach the server. Check your connection.";
 const UNEXPECTED_RESPONSE_ERROR = "Recibimos una respuesta inesperada del servidor.";
 
 function withQuery(path: string, query?: QueryParams): string {

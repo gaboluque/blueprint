@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { InputParseError, type FieldErrors } from "@/lib/errors/domain.errors";
 
-// Spanish default messages for every schema in the app.
-z.config(z.locales.es());
+z.config(z.locales.en());
 
-const INVALID_INPUT_MESSAGE = "Revisa los datos enviados.";
+const INVALID_INPUT_MESSAGE = "Check the submitted data.";
 const ROOT_FIELD = "_root";
 
 function fieldErrorsOf(error: z.ZodError): FieldErrors {

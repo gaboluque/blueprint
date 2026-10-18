@@ -1,9 +1,9 @@
 import { ConflictError, NotFoundError } from "@/lib/errors/domain.errors";
 
 export const STUDENT_ERROR_MESSAGES = {
-  notFound: "No encontramos el estudiante.",
-  emailTaken: "Ya existe un estudiante con ese correo.",
-  alreadyInactive: "El estudiante ya está inactivo.",
+  notFound: "We couldn't find the student.",
+  emailTaken: "A student with that email already exists.",
+  alreadyInactive: "The student is already inactive.",
 } as const;
 
 export const StudentErrors = {

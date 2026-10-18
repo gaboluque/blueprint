@@ -4,65 +4,76 @@ import { Database } from "@/lib/db/client";
 import { institutionMembers, institutions, students, users } from "@/lib/db/schema";
 
 // Fake data only. Idempotent: rows are keyed by unique email/slug and skipped when present.
-const DEV_ADMIN = { email: "admin@blueprint.dev", password: "Admin123!", name: "Administradora Dev" };
+const DEV_ADMIN = { email: "admin@blueprint.dev", password: "Admin123!", name: "Dev Admin" };
+
+const NORTH_UNIVERSITY_SLUG = "north-fictional-university";
+const ANDEAN_COLLEGE_SLUG = "andean-example-college";
 
 const INSTITUTIONS = [
-  { name: "Universidad Ficticia del Norte", slug: "u-ficticia-norte", contactEmail: "bienestar@ficticia-norte.test" },
-  { name: "Colegio Ejemplo Andino", slug: "colegio-ejemplo-andino", contactEmail: "contacto@ejemplo-andino.test" },
+  {
+    name: "North Fictional University",
+    slug: NORTH_UNIVERSITY_SLUG,
+    contactEmail: "wellness@north-university.test",
+  },
+  {
+    name: "Andean Example College",
+    slug: ANDEAN_COLLEGE_SLUG,
+    contactEmail: "contact@andean-college.test",
+  },
 ];
 
 const INSTITUTION_STAFF = [
   {
-    slug: "u-ficticia-norte",
-    email: "admin@ficticia-norte.test",
+    slug: NORTH_UNIVERSITY_SLUG,
+    email: "admin@north-university.test",
     password: "Staff123!",
-    name: "Admin Institucional Norte",
+    name: "North Institution Admin",
     role: "admin" as const,
   },
   {
-    slug: "u-ficticia-norte",
-    email: "profesor@ficticia-norte.test",
+    slug: NORTH_UNIVERSITY_SLUG,
+    email: "teacher@north-university.test",
     password: "Staff123!",
-    name: "Profesor Demo Norte",
+    name: "North Demo Teacher",
     role: "teacher" as const,
   },
 ];
 
 const STUDENTS = [
   {
-    slug: "u-ficticia-norte",
-    firstName: "Ana",
-    lastName: "Prueba",
-    email: "ana.prueba@ficticia-norte.test",
+    slug: NORTH_UNIVERSITY_SLUG,
+    firstName: "Anna",
+    lastName: "Sample",
+    email: "anna.sample@north-university.test",
     documentId: "1000000001",
   },
   {
-    slug: "u-ficticia-norte",
-    firstName: "Bruno",
+    slug: NORTH_UNIVERSITY_SLUG,
+    firstName: "Brian",
     lastName: "Demo",
-    email: "bruno.demo@ficticia-norte.test",
+    email: "brian.demo@north-university.test",
     documentId: "1000000002",
   },
   {
-    slug: "u-ficticia-norte",
-    firstName: "Carla",
-    lastName: "Ejemplo",
-    email: "carla.ejemplo@ficticia-norte.test",
+    slug: NORTH_UNIVERSITY_SLUG,
+    firstName: "Claire",
+    lastName: "Example",
+    email: "claire.example@north-university.test",
     documentId: "1000000003",
     status: "inactive" as const,
   },
   {
-    slug: "colegio-ejemplo-andino",
-    firstName: "Diego",
-    lastName: "Muestra",
-    email: "diego.muestra@ejemplo-andino.test",
+    slug: ANDEAN_COLLEGE_SLUG,
+    firstName: "Daniel",
+    lastName: "Fixture",
+    email: "daniel.fixture@andean-college.test",
     documentId: "1000000004",
   },
   {
-    slug: "colegio-ejemplo-andino",
-    firstName: "Elena",
-    lastName: "Ficticia",
-    email: "elena.ficticia@ejemplo-andino.test",
+    slug: ANDEAN_COLLEGE_SLUG,
+    firstName: "Emily",
+    lastName: "Fictional",
+    email: "emily.fictional@andean-college.test",
     documentId: "1000000005",
   },
 ];
@@ -130,8 +141,10 @@ async function seed(): Promise<void> {
     )
     .onConflictDoNothing({ target: students.email });
 
-  console.log(`Seed listo. Admin: ${DEV_ADMIN.email} / ${DEV_ADMIN.password}`);
-  console.log(`Staff (u-ficticia-norte): ${INSTITUTION_STAFF.map((m) => `${m.email} / ${m.password}`).join(", ")}`);
+  console.log(`Seed complete. Admin: ${DEV_ADMIN.email} / ${DEV_ADMIN.password}`);
+  console.log(
+    `Staff (${NORTH_UNIVERSITY_SLUG}): ${INSTITUTION_STAFF.map((m) => `${m.email} / ${m.password}`).join(", ")}`,
+  );
 }
 
 seed()

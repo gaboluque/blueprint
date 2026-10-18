@@ -5,5 +5,5 @@ export const runtime = "nodejs";
 
 export const GET = AdminApiHandler(async ({ actor }) => UserView.format(actor), {
   route: "GET /api/admin/me",
-  fallbackError: "No pudimos cargar tu perfil.",
+  fallbackError: "We couldn't load your profile.",
 });

@@ -10,7 +10,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 ## Conventions
 
 - **Auth.** Every route except `POST`/`DELETE /api/admin/sessions` uses `AdminApiHandler`, which requires the `blueprint_admin_session` cookie. No cookie or an invalid/expired session returns `401`.
-- **Envelope.** Success: `{ ok: true, data, pagination? }`. Failure: `{ ok: false, error, fieldErrors? }`. `error` is user-safe Spanish. `fieldErrors` maps a field path (`"email"`, `"_root"`) to a message.
+- **Envelope.** Success: `{ ok: true, data, pagination? }`. Failure: `{ ok: false, error, fieldErrors? }`. `error` is user-safe English. `fieldErrors` maps a field path (`"email"`, `"_root"`) to a message.
 - **Lists** put `pagination: { page, pageSize, total }` at the top level, next to `data` (an array).
 - **Query params** on lists: `page` (default `1`, min `1`), `pageSize` (default `20`, max `100`), `search` (trimmed, max 100, blank = none), `status` (omitted = all).
 - **Bodies** are JSON (`Content-Type: application/json`, else `415`). Unknown keys return `400` with the key in `fieldErrors`. Emails are trimmed and lowercased.
@@ -33,11 +33,11 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 
 ## Sessions
 
-| Method | Path                  | Body                  | Success                      | Errors                                          |
-| ------ | --------------------- | --------------------- | ---------------------------- | ----------------------------------------------- |
-| POST   | `/api/admin/sessions` | `{ email, password }` | `201` `UserDto`, sets cookie | `400`, `401` "Correo o contraseña incorrectos." |
-| DELETE | `/api/admin/sessions` | —                     | `204`, clears cookie         | —                                               |
-| GET    | `/api/admin/me`       | —                     | `200` `UserDto`              | `401`                                           |
+| Method | Path                  | Body                  | Success                      | Errors                                      |
+| ------ | --------------------- | --------------------- | ---------------------------- | ------------------------------------------- |
+| POST   | `/api/admin/sessions` | `{ email, password }` | `201` `UserDto`, sets cookie | `400`, `401` "Incorrect email or password." |
+| DELETE | `/api/admin/sessions` | —                     | `204`, clears cookie         | —                                           |
+| GET    | `/api/admin/me`       | —                     | `200` `UserDto`              | `401`                                       |
 
 ## Institutions
 
@@ -78,7 +78,7 @@ Contract for auth, institutions, and students. Every endpoint and client module 
 | PATCH student      | `updateStudent.service.ts`                              | `students.findById`, `student.institution(repos)`, `students.update`                           | `StudentPolicy.canUpdate`     | `institution.assertEditable()`                         |
 | DELETE student     | `deactivateStudent.service.ts`                          | `students.findById`, `student.institution(repos)`, `students.update(id, student.deactivate())` | `StudentPolicy.canDeactivate` | `institution.assertEditable()`, `student.deactivate()` |
 
-Errors come from `InstitutionErrors` / `StudentErrors` (`*.errors.ts`); don't inline new Spanish strings in services.
+Errors come from `InstitutionErrors` / `StudentErrors` (`*.errors.ts`); don't inline new English strings in services.
 
 ## Client modules
 

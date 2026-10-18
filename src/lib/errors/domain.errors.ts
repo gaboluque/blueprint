@@ -2,7 +2,7 @@ export type FieldErrors = Record<string, string>;
 
 export type DomainErrorKind = "input" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "unprocessable";
 
-/** Expected failure raised by services, models, policies, and repos. Messages are user-safe Spanish. */
+/** Expected failure raised by services, models, policies, and repos. Messages are user-safe English. */
 export abstract class DomainError extends Error {
   abstract readonly kind: DomainErrorKind;
 }
@@ -22,7 +22,7 @@ export class InputParseError extends DomainError {
 export class UnauthorizedError extends DomainError {
   readonly kind = "unauthorized";
 
-  constructor(message = "Debes iniciar sesión.") {
+  constructor(message = "You must sign in.") {
     super(message);
     this.name = "UnauthorizedError";
   }
@@ -31,7 +31,7 @@ export class UnauthorizedError extends DomainError {
 export class ForbiddenError extends DomainError {
   readonly kind = "forbidden";
 
-  constructor(message = "No tienes permiso para realizar esta acción.") {
+  constructor(message = "You don't have permission to perform this action.") {
     super(message);
     this.name = "ForbiddenError";
   }
@@ -40,7 +40,7 @@ export class ForbiddenError extends DomainError {
 export class NotFoundError extends DomainError {
   readonly kind = "not_found";
 
-  constructor(message = "No encontramos el recurso solicitado.") {
+  constructor(message = "We couldn't find the requested resource.") {
     super(message);
     this.name = "NotFoundError";
   }
@@ -49,7 +49,7 @@ export class NotFoundError extends DomainError {
 export class ConflictError extends DomainError {
   readonly kind = "conflict";
 
-  constructor(message = "Conflicto de datos.") {
+  constructor(message = "Data conflict.") {
     super(message);
     this.name = "ConflictError";
   }

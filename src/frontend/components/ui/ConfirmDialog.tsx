@@ -15,8 +15,8 @@ type ConfirmDialogProps = {
   onCancel: () => void;
 };
 
-const CANCEL_LABEL = "Cancelar";
-const PENDING_LABEL = "Procesando…";
+const CANCEL_LABEL = "Cancel";
+const PENDING_LABEL = "Processing…";
 
 export function ConfirmDialog({
   open,

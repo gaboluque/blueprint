@@ -6,7 +6,7 @@ import type { UserRole } from "@/lib/db/schema";
 import { UnauthorizedError } from "@/lib/errors/domain.errors";
 import { ApiHandlerFactory, type ApiHandlerDeps } from "./apiHandler";
 
-const SESSION_EXPIRED_MESSAGE = "Tu sesión expiró. Inicia sesión de nuevo.";
+const SESSION_EXPIRED_MESSAGE = "Your session expired. Sign in again.";
 
 function create(requiredRole: UserRole, getProvider: () => AuthProvider = Auth.provider, deps?: ApiHandlerDeps) {
   return ApiHandlerFactory.create<Actor>(async (request, repos) => {

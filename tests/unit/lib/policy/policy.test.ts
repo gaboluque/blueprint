@@ -20,10 +20,10 @@ describe("Policy", () => {
     });
 
     it("throws a forbidden error with the given message when denied", () => {
-      const act = () => Policy.authorize(false, "No puedes ver esta institución.");
+      const act = () => Policy.authorize(false, "You can't view this institution.");
 
       expect(act).toThrow(ForbiddenError);
-      expect(act).toThrow("No puedes ver esta institución.");
+      expect(act).toThrow("You can't view this institution.");
     });
   });
 });

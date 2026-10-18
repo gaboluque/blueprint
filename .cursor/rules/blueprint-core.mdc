@@ -16,7 +16,7 @@ Full guide: `AGENTS.md`. API wire contract: `_docs/api-contracts.md`. New featur
 3. **Never trust the client** for `status`, `archivedAt`, `institutionId` on update, or ids. Zod `strictObject` rejects unknown keys.
 4. **Frontend never touches DB** — data via `src/frontend/gateway/*` only.
 5. **Institutions archive, never hard delete.**
-6. Spanish user-facing strings in `<domain>.errors.ts`; no `any` / `@ts-ignore`.
+6. English user-facing strings in `<domain>.errors.ts`; no `any` / `@ts-ignore`.
 
 ## Done means
 

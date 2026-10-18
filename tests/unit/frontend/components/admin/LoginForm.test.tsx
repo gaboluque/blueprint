@@ -12,9 +12,9 @@ jest.mock("@/frontend/gateway/session", () => ({ AdminSession: { signIn: jest.fn
 const signIn = jest.mocked(AdminSession.signIn);
 
 async function submit(email: string, password: string) {
-  await userEvent.type(screen.getByLabelText("Correo electrónico"), email);
-  await userEvent.type(screen.getByLabelText("Contraseña"), password);
-  await userEvent.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+  await userEvent.type(screen.getByLabelText("Email"), email);
+  await userEvent.type(screen.getByLabelText("Password"), password);
+  await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
 }
 
 describe("LoginForm", () => {
@@ -34,12 +34,12 @@ describe("LoginForm", () => {
   });
 
   it("shows wrong credentials inline and stays on the login page", async () => {
-    signIn.mockResolvedValue({ ok: false, status: 401, error: "Correo o contraseña incorrectos." });
+    signIn.mockResolvedValue({ ok: false, status: 401, error: "Incorrect email or password." });
     render(<LoginForm />);
 
     await submit("admin@ficticia.test", "mala");
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Correo o contraseña incorrectos.");
+    expect(screen.getByRole("alert")).toHaveTextContent("Incorrect email or password.");
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
@@ -47,16 +47,16 @@ describe("LoginForm", () => {
     signIn.mockResolvedValue({
       ok: false,
       status: 400,
-      error: "Revisa los datos enviados.",
-      fieldErrors: { email: "Ingresa un correo válido." },
+      error: "Check the submitted data.",
+      fieldErrors: { email: "Invalid email address" },
     });
     render(<LoginForm />);
 
     await submit("no-es-correo", "x");
 
-    const email = screen.getByLabelText("Correo electrónico");
+    const email = screen.getByLabelText("Email");
     expect(email).toHaveAttribute("aria-invalid", "true");
-    expect(email).toHaveAccessibleDescription("Ingresa un correo válido.");
-    expect(screen.getByLabelText("Contraseña")).not.toHaveAttribute("aria-invalid");
+    expect(email).toHaveAccessibleDescription("Invalid email address");
+    expect(screen.getByLabelText("Password")).not.toHaveAttribute("aria-invalid");
   });
 });

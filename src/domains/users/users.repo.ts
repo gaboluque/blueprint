@@ -4,7 +4,7 @@ import { User } from "./user.model";
 
 export class UsersRepo extends BaseRepo<typeof users, User> {
   protected readonly table = users;
-  protected override readonly conflictMessage = "Ya existe un usuario con ese correo.";
+  protected override readonly conflictMessage = "A user with that email already exists.";
 
   protected toModel(row: Row<typeof users>): User {
     return new User(row);

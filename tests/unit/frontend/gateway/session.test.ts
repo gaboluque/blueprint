@@ -23,14 +23,14 @@ describe("AdminSession", () => {
   });
 
   it("returns the 401 message on wrong credentials", async () => {
-    mockFetch(jsonResponse({ ok: false, error: "Correo o contraseña incorrectos." }, 401));
+    mockFetch(jsonResponse({ ok: false, error: "Incorrect email or password." }, 401));
 
     const result = await AdminSession.signIn({ email: admin.email, password: "mala" });
 
     expect(result).toEqual({
       ok: false,
       status: 401,
-      error: "Correo o contraseña incorrectos.",
+      error: "Incorrect email or password.",
       fieldErrors: undefined,
     });
   });

@@ -15,7 +15,9 @@ describe("AdminStudents", () => {
   });
 
   it("returns 409 when updating a student of an archived institution", async () => {
-    const fetchMock = mockFetch(jsonResponse({ ok: false, error: "La institución está archivada." }, 409));
+    const fetchMock = mockFetch(
+      jsonResponse({ ok: false, error: "The institution is archived and can't be modified." }, 409),
+    );
 
     const result = await AdminStudents.update(student.id, { email: "otra@ficticia.test" });
 
@@ -24,7 +26,12 @@ describe("AdminStudents", () => {
       method: "PATCH",
       body: { email: "otra@ficticia.test" },
     });
-    expect(result).toEqual({ ok: false, status: 409, error: "La institución está archivada.", fieldErrors: undefined });
+    expect(result).toEqual({
+      ok: false,
+      status: 409,
+      error: "The institution is archived and can't be modified.",
+      fieldErrors: undefined,
+    });
   });
 
   it("deactivates with DELETE and returns the inactive student", async () => {

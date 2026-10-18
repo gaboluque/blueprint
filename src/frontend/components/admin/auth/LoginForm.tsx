@@ -24,10 +24,10 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={submit} noValidate className="space-y-4" aria-label="Iniciar sesión">
+    <form onSubmit={submit} noValidate className="space-y-4" aria-label="Sign in">
       {signIn.error && <Alert>{signIn.error}</Alert>}
       <TextField
-        label="Correo electrónico"
+        label="Email"
         type="email"
         name="email"
         autoComplete="email"
@@ -37,7 +37,7 @@ export function LoginForm() {
         error={signIn.fieldErrors.email}
       />
       <TextField
-        label="Contraseña"
+        label="Password"
         type="password"
         name="password"
         autoComplete="current-password"
@@ -47,7 +47,7 @@ export function LoginForm() {
         error={signIn.fieldErrors.password}
       />
       <Button type="submit" className="w-full" disabled={signIn.pending}>
-        {signIn.pending ? "Ingresando…" : "Iniciar sesión"}
+        {signIn.pending ? "Signing in…" : "Sign in"}
       </Button>
     </form>
   );

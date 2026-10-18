@@ -113,7 +113,7 @@ export abstract class BaseRepo<TTable extends TableWithId, TModel> {
   protected abstract readonly table: TTable;
   protected abstract toModel(row: Row<TTable>): TModel;
   /** Message for unique-constraint violations on insert/update. */
-  protected readonly conflictMessage: string = "Ya existe un registro con esos datos.";
+  protected readonly conflictMessage: string = "A record with those values already exists.";
   /** Set to `false` on `AuditEventsRepo` so audit writes don't recursively audit themselves. */
   protected readonly auditable: boolean = true;
 

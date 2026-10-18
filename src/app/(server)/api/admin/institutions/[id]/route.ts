@@ -12,7 +12,7 @@ export const GET = AdminApiHandler(
   async ({ actor, repos, params }) => InstitutionView.format(await GetInstitution.call(repos, actor, params)),
   {
     route: "GET /api/admin/institutions/[id]",
-    fallbackError: "No pudimos cargar la institución.",
+    fallbackError: "We couldn't load the institution.",
     paramsSchema: idParamsSchema,
   },
 );
@@ -24,7 +24,7 @@ export const PATCH = AdminApiHandler(
     ),
   {
     route: "PATCH /api/admin/institutions/[id]",
-    fallbackError: "No pudimos actualizar la institución.",
+    fallbackError: "We couldn't update the institution.",
     paramsSchema: idParamsSchema,
     bodySchema: updateInstitutionBodySchema,
   },
@@ -35,7 +35,7 @@ export const DELETE = AdminApiHandler(
     InstitutionView.format(await transaction((repos) => ArchiveInstitution.call(repos, actor, params))),
   {
     route: "DELETE /api/admin/institutions/[id]",
-    fallbackError: "No pudimos archivar la institución.",
+    fallbackError: "We couldn't archive the institution.",
     paramsSchema: idParamsSchema,
   },
 );

@@ -17,7 +17,7 @@ type Parsed<S extends Schema> = S extends z.ZodType ? z.output<S> : undefined;
 export type ApiHandlerOptions<P extends Schema, Q extends Schema, B extends Schema> = {
   /** Log label, e.g. `"GET /api/admin/institutions"`. */
   route: string;
-  /** Spanish message returned for unexpected (500) errors. */
+  /** User-facing message returned for unexpected (500) errors. */
   fallbackError: string;
   paramsSchema?: P;
   querySchema?: Q;

@@ -6,13 +6,13 @@ export type InstitutionStatus = InstitutionDto["status"];
 export type StudentStatus = StudentDto["status"];
 
 export const INSTITUTION_STATUS_LABELS: Record<InstitutionStatus, string> = {
-  active: "Activa",
-  archived: "Archivada",
+  active: "Active",
+  archived: "Archived",
 };
 
 export const STUDENT_STATUS_LABELS: Record<StudentStatus, string> = {
-  active: "Activo",
-  inactive: "Inactivo",
+  active: "Active",
+  inactive: "Inactive",
 };
 
 const INSTITUTION_STATUS_TONES: Record<InstitutionStatus, BadgeTone> = { active: "success", archived: "neutral" };

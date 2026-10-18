@@ -35,16 +35,16 @@ function StudentDetails({ student, institution }: StudentWithInstitution) {
     <DescriptionList
       items={[
         {
-          term: "Institución",
+          term: "Institution",
           detail: (
             <Link href={AdminRoutes.institution(institution.id)} className="text-teal-800 hover:underline">
               {institution.name}
             </Link>
           ),
         },
-        { term: "Correo electrónico", detail: student.email },
-        { term: "Documento de identidad", detail: student.documentId },
-        { term: "Registrado", detail: formatDate(student.createdAt) },
+        { term: "Email", detail: student.email },
+        { term: "Document ID", detail: student.documentId },
+        { term: "Registered", detail: formatDate(student.createdAt) },
       ]}
     />
   );
@@ -62,7 +62,7 @@ export function StudentDetailPage({ studentId }: { studentId: string }) {
       <Alert
         action={
           <Button variant="secondary" onClick={resource.reload}>
-            Reintentar
+            Retry
           </Button>
         }
       >
@@ -89,23 +89,23 @@ export function StudentDetailPage({ studentId }: { studentId: string }) {
       </div>
 
       {readOnly && (
-        <Alert tone="info">La institución de este estudiante está archivada. Solo puedes consultar sus datos.</Alert>
+        <Alert tone="info">This student&apos;s institution is archived. You can only view their information.</Alert>
       )}
 
       <Card
-        title="Información"
+        title="Details"
         actions={
           !readOnly &&
           !isEditing && (
             <>
               <Button variant="secondary" onClick={() => setIsEditing(true)}>
-                Editar
+                Edit
               </Button>
               {isActiveStudent(student) && (
                 <ConfirmActionButton
-                  label="Desactivar"
-                  title={`¿Desactivar a ${student.fullName}?`}
-                  description="El estudiante quedará inactivo. Su información se conserva y puedes reactivarlo editando su estado."
+                  label="Deactivate"
+                  title={`Deactivate ${student.fullName}?`}
+                  description="The student becomes inactive. Their data is kept and you can reactivate them by editing their status."
                   action={deactivate}
                   onDone={replaceStudent}
                 />
@@ -123,7 +123,7 @@ export function StudentDetailPage({ studentId }: { studentId: string }) {
               documentId: student.documentId,
               status: student.status,
             }}
-            submitLabel="Guardar cambios"
+            submitLabel="Save changes"
             submit={update}
             onSuccess={(updated) => {
               replaceStudent(updated);
