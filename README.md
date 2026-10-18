@@ -2,7 +2,7 @@
 
 Admin panel for institutions and their students. Next.js (App Router) · TypeScript strict · Postgres in Docker · Drizzle ORM · Zod · Jest.
 
-Engineering rules for humans and agents: [`AGENTS.md`](AGENTS.md). API contract: [`_docs`](_docs/api-contracts.md).
+Engineering rules for humans and agents: [`AGENTS.md`](AGENTS.md). API contract: [`_docs/api-contracts.md`](_docs/api-contracts.md). New domain checklist: [`_docs/new-domain.md`](_docs/new-domain.md). Testing: [`_docs/tests.md`](_docs/tests.md).
 
 ## Requirements
 
@@ -23,8 +23,8 @@ npm run dev       # http://localhost:3001
 
 ### Dev credentials
 
-| Email | Password |
-|---|---|
+| Email                 | Password    |
+|-----------------------|-------------|
 | `admin@blueprint.dev` | `Admin123!` |
 
 Sign in from the terminal:
@@ -38,17 +38,17 @@ curl -b cookies.txt http://localhost:3001/api/admin/me
 
 ## Commands
 
-| Command | Does |
-|---|---|
-| `make setup` | Creates `.env` if missing and runs `npm install` |
-| `make start` | Starts Postgres, migrates, and runs `next dev` |
-| `make db-up` / `make db-down` | Starts or stops the Postgres container |
-| `make db-generate NAME=…` | Generates a migration from `src/lib/db/schema.ts` (name required, snake_case, e.g. `add_audit_events`) |
-| `make db-migrate` | Applies pending migrations |
-| `make seed` | Inserts fake data (skips rows that already exist) |
-| `make lint` · `make typecheck` · `make test` | Quality gates (integration route tests need Postgres; `make db-up` or CI) |
-| `make check` | Lint, typecheck, test, and production build (matches CI except migrations) |
-| `make build` | `next build` |
+| Command                                      | Does                                                                                                   |
+|----------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| `make setup`                                 | Creates `.env` if missing and runs `npm install`                                                       |
+| `make start`                                 | Starts Postgres, migrates, and runs `next dev`                                                         |
+| `make db-up` / `make db-down`                | Starts or stops the Postgres container                                                                 |
+| `make db-generate NAME=…`                    | Generates a migration from `src/lib/db/schema.ts` (name required, snake_case, e.g. `add_audit_events`) |
+| `make db-migrate`                            | Applies pending migrations                                                                             |
+| `make seed`                                  | Inserts fake data (skips rows that already exist)                                                      |
+| `make lint` · `make typecheck` · `make test` | Quality gates (integration route tests need Postgres; `make db-up` or CI)                              |
+| `make check`                                 | Lint, typecheck, test, and production build (matches CI except migrations)                             |
+| `make build`                                 | `next build`                                                                                           |
 
 Node **22+** (see `.nvmrc`). `npm ci` installs exact versions from the lockfile.
 
@@ -84,14 +84,7 @@ tests/integration/    route tests against Postgres (`*.integration.test.ts`)
 
 ### Tests
 
-All tests use **Arrange–Act–Assert** with a blank line between each block (no `// Arrange` comments).
-
-| Kind | Layout |
-|---|---|
-| Unit | `tests/unit/**` mirrors `src/` |
-| Integration | One file per API `route.ts`; one `describe("METHOD /full/path")` per handler in that file |
-
-Integration tests need Postgres (`make db-up`). `make test` runs unit tests, then integration tests sequentially against the same database (`--runInBand`). Integration only: `npm test -- --selectProjects integration --runInBand`.
+See [`_docs/tests.md`](_docs/tests.md) (AAA, unit vs integration, factories, coverage). Postgres required for integration (`make db-up`). `make test` runs unit then integration `--runInBand`.
 
 ```
 

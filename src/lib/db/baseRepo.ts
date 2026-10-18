@@ -73,7 +73,10 @@ export type AuditSink = {
   record(entry: AuditEntry): Promise<unknown>;
 };
 
-/** Everything a repo needs from its registry: the db executor and the shared audit sink. */
+/**
+ * Injected by {@link RepoRegistry}: one Drizzle executor (connection or transaction) plus the audit sink.
+ * Repos never call `Database.get()` themselves; always `new XxxRepo(context)` from the registry.
+ */
 export type RepoContext = {
   db: DbExecutor;
   audit: AuditSink;

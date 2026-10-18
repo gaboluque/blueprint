@@ -2,6 +2,8 @@
 
 Source of truth for AI agents working in this repo. Admin panel for institutions and their students. Next.js App Router · TypeScript strict · plain Postgres · Drizzle ORM · Zod · Jest.
 
+**Reference domain:** `src/domains/institutions/` is canonical. Match its file names, export style, and service flow when adding or changing features. Step-by-step checklist: [`_docs/new-domain.md`](_docs/new-domain.md).
+
 ## Golden rules
 
 1. **Auth first.** Every `/api/admin/**` route uses `AdminApiHandler` (sign-in/sign-out use `PublicApiHandler`). Don't read cookies or bodies yourself.
@@ -117,16 +119,13 @@ export const UpdateInstitution = { call };
 
 ## Testing
 
-Every test uses **Arrange–Act–Assert**: set up data and dependencies, invoke the subject once, assert outcomes. Separate those three blocks with a **blank line** each. Do not use `// Arrange` comments or other section labels.
+Full guide: [`_docs/tests.md`](_docs/tests.md).
 
-- **Unit** (`tests/unit/**`): mirror `src/`. Add cases to existing `describe` blocks when one exists for the subject.
-- **Services:** pass fake repo objects (`{ institutions: { findById: jest.fn() } }`); never mock the subject.
-- **Integration** (`tests/integration/**`): one `*.integration.test.ts` per API `route.ts` (e.g. `institutions/route.ts` → `tests/integration/api/admin/institutions.route.integration.test.ts`). Inside the file, one top-level `describe("METHOD /api/…/path")` per exported handler (e.g. `describe("GET /api/admin/institutions")`, then `describe("POST /api/admin/institutions")`). Each `it` is one behavior and follows AAA in the test body (fixtures and sign-in belong in **Arrange**, not split across multiple acts in one `it`).
-- **Integration setup:** `IntegrationDb.reset()` in `beforeEach` for isolation. Unauthenticated cases (401) reset only; authenticated nested `describe`s add `UserFactory.createAdmin()` plus one `IntegrationRoute.signInAsAdmin()` in `beforeEach` and reuse `cookie`. Integration env sets `BCRYPT_ROUNDS=4`; `globalSetup` skips `db:migrate` when `drizzle.__drizzle_migrations` matches the journal (override with `INTEGRATION_SKIP_MIGRATE=1`). Persist rows with `tests/integration/factories/*` (defaults from `tests/factories/models.ts`). Call the exported route handler; assert status, envelope, and DB-backed fields. Never mock `Database` or domain services. `npm test` runs integration with `--runInBand` so one shared Postgres isn't truncated concurrently.
-- **Mandatory coverage:** policies, model rules, auth, error mapping, and every service's happy path plus denied/not-found/conflict cases.
-- **Names** describe the asserted behavior. No impossible states.
-- **Factories:** in-memory `tests/factories/models.ts`; persisted integration `tests/integration/factories/*.factory.ts`.
-- **Test imports:** `@/*` → `src/`; `@tests/*` → `tests/` (Jest + `tsconfig` paths).
+Every test uses **Arrange–Act–Assert** with a **blank line** between each block (no section comments). One behavior per `it`; names state what is asserted.
+
+- **Unit** (`tests/unit/**`) mirrors `src/`. **Integration** (`tests/integration/**`): one `*.integration.test.ts` per `route.ts`; one `describe("METHOD /api/…")` per handler.
+- **Services:** fake repos; never mock the service under test. **Integration:** real Postgres; never mock `Database` or domain services.
+- **Factories:** in-memory `tests/factories/models.ts`; persisted `tests/integration/factories/*.factory.ts`. Imports: `@/*`, `@tests/*`.
 
 ## Quality gates
 

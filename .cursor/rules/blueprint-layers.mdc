@@ -1,0 +1,27 @@
+---
+description: Blueprint layer ownership and request flow
+globs: src/**/*
+alwaysApply: false
+---
+
+# Blueprint — layers
+
+```
+page.tsx → frontend/features → frontend/gateway → api/route (AdminApiHandler)
+  → domains/.../services → *.repo → Drizzle → Postgres
+```
+
+| Layer | Owns | Never |
+|-------|------|-------|
+| Route | Handler options, one service call, `HandlerResults` | Queries, policies, business logic |
+| Service | One intent; policy; model rules; orchestration | HTTP, Zod, status codes |
+| Policy | Who may act (`boolean`) | I/O, state rules |
+| Model | Field behavior; relations via explicit `repos` args | Db handle, lazy load |
+| Repo | One table; `toModel`; unique → `ConflictError` | Business decisions |
+| View | Model → DTO | Business rules |
+
+**Exports:** one PascalCase object per module (`export const UpdateInstitution = { call }`). Suffixes: `.model`, `.repo`, `.policy`, `.errors`, `.service`, `.validation`, `.view`.
+
+**Services:** `call(repos: AppRepos, actor: Actor, input)` — receive repos from the handler, never open a db client.
+
+**Routes:** see route template in `AGENTS.md`. **Tests:** AAA with blank lines; integration file mirrors `route.ts` path under `tests/integration/`.

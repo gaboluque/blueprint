@@ -1,0 +1,23 @@
+---
+description: Blueprint golden rules and doc pointers for AI agents
+alwaysApply: true
+---
+
+# Blueprint — core rules
+
+Full guide: `AGENTS.md`. API wire contract: `_docs/api-contracts.md`. New feature checklist: `_docs/new-domain.md`. Tests: `_docs/tests.md` (AAA required).
+
+**Canonical code:** copy patterns from `src/domains/institutions/` (not students alone — institutions owns the full CRUD + list + archive slice).
+
+## Golden rules
+
+1. **Auth first** — `/api/admin/**` uses `AdminApiHandler`; sessions use `PublicApiHandler`. Do not read cookies or bodies outside the handler.
+2. **Authorize in services** — `Policy.authorize(XxxPolicy.canY(actor, entity))` after loading the entity. No RLS; policies are the gate.
+3. **Never trust the client** for `status`, `archivedAt`, `institutionId` on update, or ids. Zod `strictObject` rejects unknown keys.
+4. **Frontend never touches DB** — data via `src/frontend/gateway/*` only.
+5. **Institutions archive, never hard delete.**
+6. Spanish user-facing strings in `<domain>.errors.ts`; no `any` / `@ts-ignore`.
+
+## Done means
+
+`make lint` · `make typecheck` · `make test` green. Schema changes: edit `schema.ts` → `make db-generate NAME=snake_case` → review migration → `make db-migrate`.
