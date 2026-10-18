@@ -44,14 +44,18 @@ function ChevronIcon({ direction }: { direction: "left" | "right" }) {
 }
 
 const controlClass =
-  "inline-flex min-h-8 min-w-8 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-8 sm:min-w-8";
 
 export function Pagination({ page, pageSize, total, onPageChange }: PaginationProps) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const items = buildPageItems(page, totalPages);
 
   return (
-    <nav aria-label="Pagination" className="mt-4 flex justify-end">
+    <nav aria-label="Pagination" className="flex justify-between sm:justify-end">
+      {/* Numbered pages need room per button; collapse to prev/next + a page count below `sm` instead of shrinking targets. */}
+      <p className="flex items-center text-sm text-slate-600 sm:hidden" aria-live="polite">
+        Page {page} of {totalPages}
+      </p>
       <ul className="flex list-none items-center gap-1 p-0">
         <li>
           <button
@@ -66,11 +70,11 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
         </li>
         {items.map((item, index) =>
           item === "ellipsis" ? (
-            <li key={`ellipsis-${index}`} className="min-w-8 text-center text-slate-400" aria-hidden>
+            <li key={`ellipsis-${index}`} className="hidden min-w-8 text-center text-slate-400 sm:block" aria-hidden>
               …
             </li>
           ) : (
-            <li key={item}>
+            <li key={item} className="hidden sm:block">
               <button
                 type="button"
                 className={cx(

@@ -1,13 +1,9 @@
 import { execSync } from "node:child_process";
 import { Database } from "@/lib/db/client";
+import { applyIntegrationEnv } from "@tests/integration/integrationEnv";
+import { EnsureIntegrationDatabase } from "@tests/integration/helpers/ensureIntegrationDatabase";
 import { IntegrationDb } from "@tests/integration/helpers/integrationDb";
 import { IntegrationMigrations } from "@tests/integration/helpers/integrationMigrations";
-
-function applyIntegrationEnvDefaults(): void {
-  process.env.SESSION_SECRET ??= "test-session-secret-that-is-long-enough-123";
-  process.env.DATABASE_URL ??= "postgres://blueprint:blueprint@localhost:5434/blueprint";
-  process.env.BCRYPT_ROUNDS ??= "4";
-}
 
 async function ensureMigrations(): Promise<void> {
   if (process.env.INTEGRATION_SKIP_MIGRATE === "1") return;
@@ -16,7 +12,8 @@ async function ensureMigrations(): Promise<void> {
 }
 
 export default async function globalSetup(): Promise<void> {
-  applyIntegrationEnvDefaults();
+  applyIntegrationEnv();
+  await EnsureIntegrationDatabase.ensureExists();
   await ensureMigrations();
   await IntegrationDb.reset();
   await Database.close();

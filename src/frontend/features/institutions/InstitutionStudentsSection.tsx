@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { AdminInstitutions } from "@/frontend/gateway/institutions";
 import {
@@ -21,6 +21,7 @@ import { Pagination } from "@/frontend/components/shared/Pagination";
 import { Button } from "@/frontend/components/ui/Button";
 import { Card } from "@/frontend/components/ui/Card";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
+import { PlusIcon } from "@/frontend/icons/PlusIcon";
 
 const INITIAL_QUERY: ListStudentsQuery = { page: 1, pageSize: DEFAULT_PAGE_SIZE, search: undefined };
 
@@ -39,11 +40,7 @@ const COLUMNS: TableColumn<StudentDto>[] = [
   {
     key: "fullName",
     header: "Name",
-    cell: (student) => (
-      <Link href={AdminRoutes.student(student.id)} className="font-medium text-sky-800 hover:underline">
-        {student.fullName}
-      </Link>
-    ),
+    cell: (student) => student.fullName,
   },
   { key: "email", header: "Email", cell: (student) => student.email },
   { key: "documentId", header: "Document ID", cell: (student) => student.documentId },
@@ -56,12 +53,13 @@ type InstitutionStudentsSectionProps = {
 };
 
 export function InstitutionStudentsSection({ institutionId, readOnly }: InstitutionStudentsSectionProps) {
+  const router = useRouter();
   const [isAdding, setIsAdding] = useState(false);
   const fetch = useCallback(
     (query: ListStudentsQuery) => AdminInstitutions.listStudents(institutionId, query),
     [institutionId],
   );
-  const create = useCallback(
+  const createStudent = useCallback(
     (body: CreateStudentBody) => AdminInstitutions.createStudent(institutionId, body),
     [institutionId],
   );
@@ -71,21 +69,31 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
     querySchema: listStudentsQuerySchema,
   });
 
+  const openStudent = (student: { id: string }) => {
+    router.push(AdminRoutes.student(student.id));
+  };
+
+  const finishAddStudent = () => {
+    setIsAdding(false);
+    list.refetch();
+  };
+
   return (
     <Card
       title="Students"
-      actions={!readOnly && !isAdding && <Button onClick={() => setIsAdding(true)}>Add student</Button>}
+      actions={
+        !readOnly &&
+        !isAdding && <Button size="sm" icon={<PlusIcon />} onClick={() => setIsAdding(true)} aria-label="Add student" />
+      }
+      footer={<Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />}
     >
       {isAdding && !readOnly && (
         <div className="mb-6 rounded-md border border-slate-200 p-4">
           <h3 className="mb-3 font-medium text-slate-900">New student</h3>
           <StudentForm
             submitLabel="Add student"
-            submit={create}
-            onSuccess={() => {
-              setIsAdding(false);
-              list.refetch();
-            }}
+            submit={createStudent}
+            onSuccess={finishAddStudent}
             onCancel={() => setIsAdding(false)}
           />
         </div>
@@ -99,8 +107,7 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
         isEmpty={list.data.length === 0}
         emptyMessage="No students match the filters."
       >
-        <Table columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} />
-        <Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />
+        <Table columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} onRowClick={openStudent} />
       </ListShell>
     </Card>
   );

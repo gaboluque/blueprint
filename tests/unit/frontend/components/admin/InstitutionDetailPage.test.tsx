@@ -80,6 +80,18 @@ describe("InstitutionDetailPage", () => {
     expect(screen.queryByText(/This institution is archived/)).not.toBeInTheDocument();
   });
 
+  it("opens the edit form in a dialog and closes it on cancel", async () => {
+    render(<InstitutionDetailPage institutionId={institution.id} />);
+    await userEvent.click(await screen.findByRole("button", { name: "Edit" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Edit institution" });
+    expect(within(dialog).getByLabelText("Name")).toHaveValue("Norte");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByText("contacto@ficticia.test")).toBeInTheDocument();
+  });
+
   it("renders an archived institution without write actions", async () => {
     jest.mocked(AdminInstitutions.get).mockResolvedValue({ ok: true, data: archived });
 

@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useState } from "react";
 import { AdminInstitutions } from "@/frontend/gateway/institutions";
 import type { UpdateInstitutionBody } from "@/domains/institutions/validations/institution.validation";
 import type { InstitutionDto } from "@/domains/institutions/views/institution.view";
-import { AdminRoutes } from "@/frontend/components/admin/adminRoutes";
-import { InstitutionStatusBadge, isArchived } from "@/frontend/components/admin/statusLabels";
+import { isArchived } from "@/frontend/components/admin/statusLabels";
 import { useResource } from "@/frontend/hooks/useResource";
 import { ConfirmActionButton } from "@/frontend/components/shared/ConfirmActionButton";
 import { formatDate } from "@/lib/date";
@@ -15,7 +13,9 @@ import { Alert } from "@/frontend/components/ui/Alert";
 import { Button } from "@/frontend/components/ui/Button";
 import { Card } from "@/frontend/components/ui/Card";
 import { DescriptionList } from "@/frontend/components/ui/DescriptionList";
-import { InstitutionForm } from "./InstitutionForm";
+import { EditIcon } from "@/frontend/icons/EditIcon";
+import { TrashIcon } from "@/frontend/icons/TrashIcon";
+import { InstitutionFormModal } from "./InstitutionFormModal";
 import { InstitutionStudentsSection } from "./InstitutionStudentsSection";
 
 function InstitutionDetails({ institution }: { institution: InstitutionDto }) {
@@ -39,6 +39,13 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
   );
   const archive = useCallback(() => AdminInstitutions.archive(institutionId), [institutionId]);
   const [isEditing, setIsEditing] = useState(false);
+  const saveInstitution = useCallback(
+    (updated: InstitutionDto) => {
+      resource.replace(updated);
+      setIsEditing(false);
+    },
+    [resource],
+  );
   const institution = resource.data;
 
   if (resource.error) {
@@ -60,55 +67,44 @@ export function InstitutionDetailPage({ institutionId }: { institutionId: string
 
   return (
     <>
-      <div>
-        <Link href={AdminRoutes.institutions} className="text-sm text-sky-800 hover:underline">
-          ← Institutions
-        </Link>
-        <div className="mt-2 flex items-center gap-3">
-          <h1 className="text-2xl font-semibold text-slate-900">{institution.name}</h1>
-          <InstitutionStatusBadge status={institution.status} />
-        </div>
-      </div>
-
       {readOnly && <Alert tone="info">This institution is archived. You can only view its information.</Alert>}
-
       <Card
-        title="Details"
+        title={institution.name}
         actions={
-          !readOnly &&
-          !isEditing && (
+          !readOnly && (
             <>
-              <Button variant="secondary" onClick={() => setIsEditing(true)}>
-                Edit
-              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<EditIcon />}
+                onClick={() => setIsEditing(true)}
+                aria-label="Edit"
+              />
               <ConfirmActionButton
                 label="Archive"
                 title={`Archive ${institution.name}?`}
                 description="The institution becomes read-only. Its students are kept."
                 action={archive}
                 onDone={resource.replace}
+                icon={<TrashIcon />}
               />
             </>
           )
         }
       >
-        {isEditing ? (
-          <InstitutionForm
-            initialValues={{ name: institution.name, contactEmail: institution.contactEmail }}
-            submitLabel="Save changes"
-            submit={update}
-            onSuccess={(updated) => {
-              resource.replace(updated);
-              setIsEditing(false);
-            }}
-            onCancel={() => setIsEditing(false)}
-          />
-        ) : (
-          <InstitutionDetails institution={institution} />
-        )}
+        <InstitutionDetails institution={institution} />
       </Card>
 
       <InstitutionStudentsSection institutionId={institution.id} readOnly={readOnly} />
+      <InstitutionFormModal
+        open={isEditing}
+        title="Edit institution"
+        submitLabel="Save changes"
+        initialValues={{ name: institution.name, contactEmail: institution.contactEmail }}
+        submit={update}
+        onSuccess={saveInstitution}
+        onClose={() => setIsEditing(false)}
+      />
     </>
   );
 }

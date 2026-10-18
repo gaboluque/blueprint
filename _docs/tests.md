@@ -155,7 +155,8 @@ Reference: `tests/unit/app/api/admin/institutions/route.test.ts`, `tests/unit/li
 
 ### Environment
 
-- Postgres must be up (`make db-up`). Migrations applied (`make db-migrate`).
+- Postgres must be up (`make db-up`). Dev data lives in `blueprint`; integration tests **always** connect to `blueprint_test` (created on first run if missing), regardless of `DATABASE_URL` in `.env`.
+- Optional override: `INTEGRATION_DATABASE_URL`.
 - `BCRYPT_ROUNDS=4` in integration env for speed.
 - `globalSetup` skips migrate when the journal already matches (override with `INTEGRATION_SKIP_MIGRATE=1`).
 - `make test` runs unit, then integration **`--runInBand`** (one shared DB; no parallel truncation).

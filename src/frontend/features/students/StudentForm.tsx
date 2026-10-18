@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useEffect, useId, type FormEvent } from "react";
 import type { ApiResult } from "@/frontend/gateway/apiClient";
 import { createStudentBodySchema, type CreateStudentBody } from "@/domains/students/validations/student.validation";
 import type { StudentDto } from "@/domains/students/views/student.view";
@@ -21,7 +21,10 @@ type StudentFormProps = {
   submit: (values: StudentFormValues) => Promise<ApiResult<StudentDto>>;
   onSuccess: (student: StudentDto) => void;
   onCancel: () => void;
+  onPendingChange?: (pending: boolean) => void;
   idPrefix?: string;
+  formId?: string;
+  showInlineActions?: boolean;
 };
 
 const EMPTY_VALUES: StudentFormValues = {
@@ -40,14 +43,23 @@ export function StudentForm({
   submit,
   onSuccess,
   onCancel,
+  onPendingChange,
   idPrefix = "student",
+  formId: formIdProp,
+  showInlineActions = true,
 }: StudentFormProps) {
+  const generatedFormId = useId();
+  const formId = formIdProp ?? generatedFormId;
   const form = useForm({
     idPrefix,
     initialValues,
     schema: createStudentBodySchema,
   });
   const mutation = useMutation(submit);
+
+  useEffect(() => {
+    onPendingChange?.(mutation.pending);
+  }, [mutation.pending, onPendingChange]);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -67,7 +79,7 @@ export function StudentForm({
   const bannerMessage = mutation.error && (mutation.fieldErrors._root ?? form.generalError ?? mutation.error);
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4" aria-label={submitLabel}>
+    <form id={formId} onSubmit={onSubmit} noValidate className="space-y-4" aria-label={submitLabel}>
       {bannerMessage ? <Alert>{bannerMessage}</Alert> : null}
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField label="First name" required field={form.getField("firstName")} />
@@ -76,7 +88,9 @@ export function StudentForm({
         <TextField label="Document ID" required field={form.getField("documentId")} />
         <SelectField label="Status" options={STATUS_OPTIONS} field={form.getField("status", { select: true })} />
       </div>
-      <FormActions submitLabel={submitLabel} pending={mutation.pending} onCancel={onCancel} />
+      {showInlineActions ? (
+        <FormActions submitLabel={submitLabel} pending={mutation.pending} onCancel={onCancel} />
+      ) : null}
     </form>
   );
 }

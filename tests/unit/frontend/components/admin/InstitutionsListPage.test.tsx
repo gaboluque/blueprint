@@ -36,10 +36,24 @@ describe("InstitutionsListPage", () => {
     list.mockResolvedValue({ ok: true, data: [norte, sur], pagination: { page: 1, pageSize: 20, total: 2 } });
   });
 
+  it("opens the create form in a dialog and closes it on cancel", async () => {
+    render(<InstitutionsListPage />);
+    await screen.findByRole("table");
+
+    await userEvent.click(screen.getByRole("button", { name: "New institution" }));
+
+    const dialog = screen.getByRole("dialog", { name: "New institution" });
+    expect(within(dialog).getByLabelText("Name")).toHaveValue("");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "New institution" })).toBeInTheDocument();
+  });
+
   it("renders each institution with its student count, status, and opens detail on row click", async () => {
     render(<InstitutionsListPage />);
 
-    await screen.findByText("Norte");
+    await screen.findByRole("table");
     const [, norteRow, surRow] = screen.getAllByRole("row");
     await userEvent.click(norteRow as HTMLElement);
     expect(mockRouter.push).toHaveBeenCalledWith(`/admin/institutions/${norte.id}`);
@@ -52,7 +66,7 @@ describe("InstitutionsListPage", () => {
 
   it("refetches from page 1 when the status filter changes", async () => {
     render(<InstitutionsListPage />);
-    await screen.findByText("Norte");
+    await screen.findByRole("table");
 
     await userEvent.selectOptions(screen.getByLabelText("Status"), "archived");
 
@@ -74,7 +88,7 @@ describe("InstitutionsListPage", () => {
 
   it("applies the search only when it is submitted", async () => {
     render(<InstitutionsListPage />);
-    await screen.findByText("Norte");
+    await screen.findByRole("table");
 
     await userEvent.type(screen.getByLabelText("Search by name"), "  norte ");
     const callsWhileTyping = list.mock.calls.length;
@@ -92,7 +106,7 @@ describe("InstitutionsListPage", () => {
     expect(alert).toHaveTextContent("We couldn't load institutions.");
     await userEvent.click(within(alert).getByRole("button", { name: "Retry" }));
 
-    expect(await screen.findByText("Norte")).toBeInTheDocument();
+    expect(await screen.findByRole("table")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 

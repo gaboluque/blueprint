@@ -4,15 +4,16 @@ type FormActionsProps = {
   submitLabel: string;
   pending: boolean;
   onCancel: () => void;
+  formId?: string;
 };
 
-export function FormActions({ submitLabel, pending, onCancel }: FormActionsProps) {
+export function FormActions({ submitLabel, pending, onCancel, formId }: FormActionsProps) {
   return (
     <div className="flex justify-end gap-2">
       <Button variant="secondary" onClick={onCancel} disabled={pending}>
         Cancel
       </Button>
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" form={formId} disabled={pending}>
         {pending ? "Saving…" : submitLabel}
       </Button>
     </div>

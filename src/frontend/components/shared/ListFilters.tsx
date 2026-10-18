@@ -37,14 +37,14 @@ function SearchFilter<Q>({
   };
 
   return (
-    <form role="search" onSubmit={submit} className="flex items-end gap-2">
+    <form role="search" onSubmit={submit} className="flex w-full items-end gap-2 sm:w-auto">
       <TextField
         type="search"
         label={field.label}
         value={draft}
         onChange={setDraft}
         placeholder={field.placeholder}
-        className="w-64"
+        className="w-full sm:w-64"
       />
       <Button type="submit" variant="secondary">
         {SEARCH_BUTTON_LABEL}
@@ -64,14 +64,14 @@ function SelectFilter<Q>({
       value={valueOf(query, field.name)}
       options={[{ value: "", label: field.allLabel }, ...field.options]}
       onChange={(value) => onChange(patchOf<Q>(field.name, value))}
-      className="w-48"
+      className="w-full sm:w-48"
     />
   );
 }
 
 export function ListFilters<Q>({ fields, query, onChange }: ListFiltersProps<Q>) {
   return (
-    <div className="mb-4 flex flex-wrap items-end gap-4">
+    <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
       {fields.map((field) =>
         field.type === "search" ? (
           <SearchFilter

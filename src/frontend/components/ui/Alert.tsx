@@ -21,7 +21,10 @@ export function Alert({
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={cx("flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm", TONE_CLASSES[tone])}
+      className={cx(
+        "flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm",
+        TONE_CLASSES[tone],
+      )}
     >
       <div>{children}</div>
       {action}

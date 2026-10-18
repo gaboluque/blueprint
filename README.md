@@ -118,7 +118,7 @@ tests/integration/  Route tests against Postgres (*.integration.test.ts)
 
 **Repos and models.** `BaseRepo` + rich model classes; models do not hold a db handle. Authorization lives in `*.policy.ts` and runs in services (fail closed).
 
-**Tests.** [`_docs/tests.md`](_docs/tests.md). Integration tests need `make db-up`; `make test` runs integration `--runInBand`.
+**Tests.** [`_docs/tests.md`](_docs/tests.md). Integration tests need `make db-up` and use the `blueprint_test` database (separate from dev `blueprint`); `make test` runs integration `--runInBand`.
 
 **Auth.** Implement `AuthProvider` (`signIn`, `authenticate`) and wire it in `src/lib/auth/auth.ts`. The included dev adapter uses bcrypt + HS256 session cookie.
 

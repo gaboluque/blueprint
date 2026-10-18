@@ -15,4 +15,8 @@ function get(): AppEnv {
   return cached;
 }
 
-export const Env = { get };
+function clearCache(): void {
+  cached = null;
+}
+
+export const Env = { get, clearCache };

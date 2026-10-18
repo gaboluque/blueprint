@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import type { ApiResult } from "@/frontend/gateway/apiClient";
 import { useMutation } from "@/frontend/hooks/useMutation";
-import { Button } from "@/frontend/components/ui/Button";
+import { Button, type ButtonProps } from "@/frontend/components/ui/Button";
 import { ConfirmDialog } from "@/frontend/components/ui/ConfirmDialog";
 
 type ConfirmActionButtonProps<T> = {
@@ -12,10 +12,20 @@ type ConfirmActionButtonProps<T> = {
   description: string;
   action: () => Promise<ApiResult<T>>;
   onDone: (data: T) => void;
+  icon?: ButtonProps["icon"];
+  size?: ButtonProps["size"];
 };
 
 /** Destructive action behind a confirmation dialog; errors stay inline in the dialog. */
-export function ConfirmActionButton<T>({ label, title, description, action, onDone }: ConfirmActionButtonProps<T>) {
+export function ConfirmActionButton<T>({
+  label,
+  title,
+  description,
+  action,
+  onDone,
+  icon,
+  size = "sm",
+}: ConfirmActionButtonProps<T>) {
   const [isConfirming, setIsConfirming] = useState(false);
   const mutation = useMutation(action);
   const { reset } = mutation;
@@ -34,8 +44,14 @@ export function ConfirmActionButton<T>({ label, title, description, action, onDo
 
   return (
     <>
-      <Button variant="danger" onClick={() => setIsConfirming(true)}>
-        {label}
+      <Button
+        variant="danger"
+        size={size}
+        icon={icon}
+        onClick={() => setIsConfirming(true)}
+        aria-label={icon ? label : undefined}
+      >
+        {icon ? undefined : label}
       </Button>
       <ConfirmDialog
         open={isConfirming}
