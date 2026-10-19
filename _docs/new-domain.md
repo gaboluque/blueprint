@@ -36,7 +36,7 @@ Service order: load via repo → `if (!entity) throw XxxErrors.notFound()` → `
 ## 4. Browser
 
 - [ ] `src/frontend/gateway/<domain>.ts` — PascalCase export (`AdminXxx`), one method per endpoint, `ApiResult<T>`
-- [ ] `src/frontend/features/<domain>/` — pages, forms, list shells. Reuse `Table`/`ListFilters`/`Card`/`Button` as-is; they're mobile-first (unprefixed Tailwind classes target phones, `sm:`+ scales up). Hand-rolled grids/tables lose that for free
+- [ ] `src/frontend/features/<domain>/` — pages, `<Entity>Form` + `<Entity>FormModal` (create/edit in `Modal`; login excepted), list shells. Reuse `Table`/`ListFilters`/`Card`/`Button` as-is; they're mobile-first (unprefixed Tailwind classes target phones, `sm:`+ scales up). Hand-rolled grids/tables lose that for free
 - [ ] `src/app/(client)/admin/(panel)/<domain>/page.tsx` — thin binding + `AdminPageGuard.requireAdmin()`
 - [ ] Add paths to `src/frontend/components/admin/adminRoutes.ts` when navigation needs them
 

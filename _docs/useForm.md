@@ -4,7 +4,16 @@ Client-side form state for admin features. `AGENTS.md` lists hooks at a glance; 
 
 **Source:** `src/frontend/hooks/useForm.ts`  
 **Tests:** `tests/unit/frontend/hooks/useForm.test.ts`  
-**Reference forms:** `InstitutionForm.tsx`, `StudentForm.tsx`, `LoginForm.tsx`
+**Reference forms:** `InstitutionForm.tsx`, `StudentForm.tsx`, `LoginForm.tsx`  
+**Modal shells:** `InstitutionFormModal.tsx`, `StudentFormModal.tsx` — see `.cursor/rules/blueprint-forms.mdc`
+
+---
+
+## Create/edit UI (modals)
+
+Admin create and edit flows use a `*FormModal` wrapper around `*Form` and shared `Modal` + `FormActions`. Pages hold `open` state and pass `submit` from the gateway. **Login** is the only full-page form.
+
+When two form modals can mount on one page, pass a distinct `idPrefix` on the modal (see `InstitutionStudentsSection`).
 
 ---
 

@@ -11,7 +11,7 @@ import {
 import type { StudentDto } from "@/domains/students/views/student.view";
 import { AdminRoutes } from "@/frontend/components/admin/adminRoutes";
 import { STUDENT_STATUS_LABELS, StudentStatusBadge } from "@/frontend/components/admin/statusLabels";
-import { StudentForm } from "@/frontend/features/students/StudentForm";
+import { StudentFormModal } from "@/frontend/features/students/StudentFormModal";
 import { useListQuery } from "@/frontend/hooks/useListQuery";
 import { Table, type TableColumn } from "@/frontend/components/shared/Table";
 import { ListFilters } from "@/frontend/components/shared/ListFilters";
@@ -79,36 +79,41 @@ export function InstitutionStudentsSection({ institutionId, readOnly }: Institut
   };
 
   return (
-    <Card
-      title="Students"
-      actions={
-        !readOnly &&
-        !isAdding && <Button size="sm" icon={<PlusIcon />} onClick={() => setIsAdding(true)} aria-label="Add student" />
-      }
-      footer={<Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />}
-    >
-      {isAdding && !readOnly && (
-        <div className="mb-6 rounded-md border border-slate-200 p-4">
-          <h3 className="mb-3 font-medium text-slate-900">New student</h3>
-          <StudentForm
-            submitLabel="Add student"
-            submit={createStudent}
-            onSuccess={finishAddStudent}
-            onCancel={() => setIsAdding(false)}
-          />
-        </div>
+    <>
+      {!readOnly && (
+        <StudentFormModal
+          open={isAdding}
+          title="New student"
+          submitLabel="Add student"
+          submit={createStudent}
+          onSuccess={finishAddStudent}
+          onClose={() => setIsAdding(false)}
+          idPrefix="institution-student"
+        />
       )}
-      <ListFilters fields={FILTER_FIELDS} query={list.query} onChange={list.patchQuery} />
-      <ListShell
-        isLoading={list.isLoading}
-        hasLoadedOnce={list.hasLoadedOnce}
-        error={list.error}
-        onRetry={list.refetch}
-        isEmpty={list.data.length === 0}
-        emptyMessage="No students match the filters."
+
+      <Card
+        title="Students"
+        actions={
+          !readOnly &&
+          !isAdding && (
+            <Button size="sm" icon={<PlusIcon />} onClick={() => setIsAdding(true)} aria-label="Add student" />
+          )
+        }
+        footer={<Pagination {...list.pagination} onPageChange={(page) => list.patchQuery({ page })} />}
       >
-        <Table columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} onRowClick={openStudent} />
-      </ListShell>
-    </Card>
+        <ListFilters fields={FILTER_FIELDS} query={list.query} onChange={list.patchQuery} />
+        <ListShell
+          isLoading={list.isLoading}
+          hasLoadedOnce={list.hasLoadedOnce}
+          error={list.error}
+          onRetry={list.refetch}
+          isEmpty={list.data.length === 0}
+          emptyMessage="No students match the filters."
+        >
+          <Table columns={COLUMNS} rows={list.data} rowKey={(row) => row.id} onRowClick={openStudent} />
+        </ListShell>
+      </Card>
+    </>
   );
 }

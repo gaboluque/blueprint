@@ -1,0 +1,26 @@
+---
+description: Admin create/edit forms open in Modal shells (login excepted)
+alwaysApply: true
+---
+
+# Blueprint — forms in modals
+
+Full wiring: `_docs/useForm.md`. Reference: `InstitutionFormModal.tsx`, `StudentFormModal.tsx`.
+
+## Rule
+
+Every admin **create** and **edit** form opens inside `Modal` from `@/frontend/components/ui/Modal`, not inline on the page or on a dedicated form route.
+
+**Exception:** `LoginForm` stays on the login page (full-page card, not a modal).
+
+## Pattern
+
+1. **`*Form.tsx`** — fields, `useForm`, submit handler; supports `formId`, `showInlineActions={false}`, `onPendingChange` for modal footers.
+2. **`*FormModal.tsx`** — wraps `*Form` in `Modal` with `FormActions` in `footer`; disables close while submit is pending.
+3. **List/detail pages** — `useState` for open flag; primary action sets it true; render `*FormModal` as a sibling (often above the list `Card`).
+
+Do not render `*Form` directly from pages or sections for create/edit. Filter/search fields on list pages stay inline (`TextField` controlled mode) — they are not entity forms.
+
+## New domain forms
+
+Add `<Entity>Form.tsx` + `<Entity>FormModal.tsx` under `src/frontend/features/<domain>/`. Copy `InstitutionFormModal` structure.

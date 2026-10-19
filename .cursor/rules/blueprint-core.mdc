@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Blueprint — core rules
 
-Full guide: `AGENTS.md`. API wire contract: `_docs/api-contracts.md`. New feature checklist: `_docs/new-domain.md`. Tests: `_docs/tests.md` (AAA required). Forms: `_docs/useForm.md`.
+Full guide: `AGENTS.md`. API wire contract: `_docs/api-contracts.md`. New feature checklist: `_docs/new-domain.md`. Tests: `_docs/tests.md` (AAA required). Forms: `_docs/useForm.md` · modal shells: `.cursor/rules/blueprint-forms.mdc`.
 
 **Canonical code:** copy patterns from `src/domains/institutions/` (not students alone — institutions owns the full CRUD + list + archive slice).
 

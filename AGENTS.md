@@ -85,6 +85,7 @@ A new feature touches four folders: `frontend/gateway/<domain>.ts` (one method p
 - **Async / background work:** none yet. When a feature needs it (email, slow jobs), call the work inline from the service first; only add a queue (pg-boss, BullMQ + Redis, QStash, …) once more than one feature needs deferred work — don't build the abstraction speculatively.
 - **Schema changes:** edit `src/lib/db/schema.ts` → `make db-generate NAME=<snake_case>` (required; never accept drizzle-kit’s random Marvel names) → review the SQL in `db/migrations` → `make db-migrate`. Names describe the change (`add_audit_events`, not `0001_demonic_matthew_murdock`). Same via `npm run db:generate -- add_audit_events`.
 - **Copy:** English for all user-facing text. Code, comments, and logs in English. Comments only for a non-obvious why.
+- **Forms:** Admin create/edit use `*FormModal` + shared `Modal` (see `.cursor/rules/blueprint-forms.mdc`). Login stays full-page.
 
 ## Route template
 
